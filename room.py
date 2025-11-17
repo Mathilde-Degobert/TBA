@@ -1,7 +1,14 @@
 # Define the Room class.
 
 class Room:
+ """
+    This class represents a room. A room is composed of a name, a description, and exits.
 
+    Attributes:
+        name (str): The name of the room.
+        description (str): The description of the room.
+        exits (dictionnaire): The different exits possible.
+"""
     # Define the constructor. 
     def __init__(self, name, description):
         self.name = name
