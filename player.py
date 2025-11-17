@@ -1,15 +1,15 @@
 # Define the Player class.
 class Player():
- """
-    This class represents a player. A player is composed of a name and a current room.
+    """
+        This class represents a player. A player is composed of a name and a current room.
 
-    Attributes:
-        name (str): The name.
-        current_room (Room): The current room.
-    Methods:
-        __init__(self, name) : The constructor.
-        move(self, direction): The move
-"""
+        Attributes:
+            name (str): The name.
+            current_room (Room): The current room.
+        Methods:
+            __init__(self, name) : The constructor.
+            move(self, direction): The move
+    """
     # Define the constructor.
     def __init__(self, name):
         self.name = name
