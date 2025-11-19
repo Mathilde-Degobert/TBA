@@ -30,18 +30,22 @@ class Game:
         
         # Setup rooms
 
-        forest = Room("Forest", "une forêt enchantée. Vous entendez une brise légère à travers la cime des arbres.")
+        forest = Room("Forest", "un sentier sombre, une cabane abandonnée et le bruit assourdissant d'une cascade.")
         self.rooms.append(forest)
-        tower = Room("Tower", "une immense tour en pierre qui s'élève au dessus des nuages.")
-        self.rooms.append(tower)
-        cave = Room("Cave", "une grotte profonde et sombre. Des voix semblent provenir des profondeurs.")
-        self.rooms.append(cave)
-        cottage = Room("Cottage", "un petit chalet pittoresque avec un toit de chaume. Une épaisse fumée verte sort de la cheminée.")
-        self.rooms.append(cottage)
-        swamp = Room("Swamp", "un marécage sombre et ténébreux. L'eau bouillonne, les abords sont vaseux.")
-        self.rooms.append(swamp)
-        castle = Room("Castle", "un énorme château fort avec des douves et un pont levis. Sur les tours, des flèches en or massif.")
-        self.rooms.append(castle)
+        Maison_rez_de_chaussée = Room("Rez de chaussée", "une grande pièce abandonée, un silence lugubre règne. La seule trace de vie : des traces de passage dans la poussière du parquet qui menace de craquer à chaque pas.")
+        self.rooms.append(Maison_rez_de_chaussée)
+        Maison_étage = Room("Etage", "une odeur de pourriture et de moisissure, un fin rayon de lumière révèle les lieux autrement noyé par le noir. Les murs semblent écouter, vous retenez votre souffle.")
+        self.rooms.append(Maison_étage)
+        Champs = Room("Champs", "un champs de maïs peu entrenu, un petit sentier de sable sillone les brins séchés. Au loin vous apercevez un silo abandonné, abimé par le passage du temps.")
+        self.rooms.append(Champs)
+        Magasin = Room("Magasin", "une ruelle au bitume éclatée, la devanture cassée révèle une superette aux rayons renversés.")
+        self.rooms.append(Magasin)
+        pont = Room("pont", "un grand pont un peu fissuré.")
+        self.rooms.append(pont)
+        Voiture = Room("Voiture", "une vielle cadillac bleu aux phares jaunies et à la carosserie.")
+        self.rooms.append(Voiture)
+        Sous-sol = Room("Sous-sol", "un énorme château fort avec des douves et un pont levis. Sur les tours, des flèches en or massif.")
+        self.rooms.append(Sous-sol)
 
         # Create exits for rooms
 
