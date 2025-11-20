@@ -52,11 +52,17 @@ class Actions:
             command_word = list_of_words[0]
             print(MSG1.format(command_word=command_word))
             return False
+        directions = {"NORD": "N" , "N":"N" , "SUD":"S" , "S": "S" , "OUEST":"O" , "O":"O",
+                       "EST":"E" , "E":"E" , "UP": "U" , "U":"U" , "DOWN":"D" , "D":"D"}
 
         # Get the direction from the list of words.
-        direction = list_of_words[1]
-        # Move the player in the direction specified by the parameter.
-        player.move(direction)
+        direction = list_of_words[1].upper()
+        if direction in directions:
+            direction = directions[direction]
+            # Move the player in the direction specified by the parameter.
+            player.move(direction)
+        else:
+            print("\nDirection", direction,"non reconnue")
         return True
 
     def quit(game, list_of_words, number_of_parameters):

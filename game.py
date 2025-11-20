@@ -30,33 +30,33 @@ class Game:
         
         # Setup rooms
 
-        forest = Room("Forest", "un sentier sombre, une cabane abandonnée et le bruit assourdissant d'une cascade.")
+        forest = Room("Forest", " un sentier sombre, une cabane abandonnée et le bruit assourdissant d'une cascade.")
         self.rooms.append(forest)
-        Maison_rez_de_chaussée = Room("Rez de chaussée", "une grande pièce abandonée, un silence lugubre règne. La seule trace de vie : des traces de passage dans la poussière du parquet qui menace de craquer à chaque pas.")
+        Maison_rez_de_chaussée = Room("Rez de chaussée", " une grande pièce abandonée, un silence lugubre règne. La seule trace de vie : des traces de passage dans la poussière du parquet qui menace de craquer à chaque pas.")
         self.rooms.append(Maison_rez_de_chaussée)
-        Maison_étage = Room("Etage", "une odeur de pourriture et de moisissure, un fin rayon de lumière révèle les lieux autrement noyé par le noir. Les murs semblent écouter, vous retenez votre souffle.")
+        Maison_étage = Room("Etage", " une odeur de pourriture et de moisissure, un fin rayon de lumière révèle les lieux autrement noyé par le noir. Les murs semblent écouter, vous retenez votre souffle.")
         self.rooms.append(Maison_étage)
-        Champs = Room("Champs", "un champs de maïs peu entrenu, un petit sentier de sable sillone les brins séchés. Au loin vous apercevez un silo abandonné, abimé par le passage du temps.")
+        Champs = Room("Champs", " un champs de maïs peu entrenu, un petit sentier de sable sillone les brins séchés. Au loin vous apercevez un silo abandonné, abimé par le passage du temps.")
         self.rooms.append(Champs)
-        Magasin = Room("Magasin", "une ruelle au bitume éclatée, la devanture cassée révèle une superette aux rayons renversés.")
+        Magasin = Room("Magasin", " une ruelle au bitume éclatée, la devanture cassée révèle une superette aux rayons renversés.")
         self.rooms.append(Magasin)
-        pont = Room("pont", "un grand pont un peu fissuré.")
+        pont = Room("pont", " un grand pont un peu fissuré.")
         self.rooms.append(pont)
-        Voiture = Room("Voiture", "une vielle cadillac bleu aux phares jaunies et à la carosserie.")
+        Voiture = Room("Voiture", " une vielle cadillac bleu aux phares jaunies et à la carosserie.")
         self.rooms.append(Voiture)
-        Sous-sol = Room("Sous-sol", "un énorme château fort avec des douves et un pont levis. Sur les tours, des flèches en or massif.")
-        self.rooms.append(Sous-sol)
+        Sous_sol = Room("Sous-sol", " une pièce humide, plongée dans le noir, jonchée d'objets en tout genre.")
+        self.rooms.append(Sous_sol)
 
         # Create exits for rooms
 
         forest.exits = {"N" : None, "E" : None, "S" : pont, "O" : None, "U": None, "D": None}
         pont.exits = {"N" : forest, "E" : None, "S" : Magasin, "O" : None, "U": None, "D": None}
         Magasin.exits = {"N" : pont, "E" : Champs, "S" : None, "O" : None, "U": None, "D": None }
-        Champs.exits = {"N" : None, "E" : None, "S" : Maison_rez_de_chaussée, "O" : Magasin, "U": Maison_étage, "D": Sous-sol}
-        Maison_rez_de_chaussée.exits = {"N" : Champs, "E" : None, "S" : Voiture, "O" : None, "U": None, "D": Sous-sol}
+        Champs.exits = {"N" : None, "E" : None, "S" : Maison_rez_de_chaussée, "O" : Magasin, "U": None, "D": None}
+        Maison_rez_de_chaussée.exits = {"N" : Champs, "E" : None, "S" : Voiture, "O" : None, "U": Maison_étage, "D": Sous_sol}
         Maison_étage.exits = {"N" : None, "E" : None, "S" : None, "O" : None, "U": None, "D": Maison_rez_de_chaussée}
         Voiture.exits = {"N" : Maison_rez_de_chaussée , "E" : None, "S" : None, "O" : None, "U": None, "D": None}
-        Sous-sol.exits = {"N" : None , "E" : None, "S" : None, "O" : None, "U": Maison_rez_de_chaussée , "D": None}
+        Sous_sol.exits = {"N" : None , "E" : None, "S" : None, "O" : None, "U": Maison_rez_de_chaussée, "D": None}
       
         # Setup player and starting room
 
