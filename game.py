@@ -49,13 +49,15 @@ class Game:
 
         # Create exits for rooms
 
-        forest.exits = {"N" : cave, "E" : None, "S" : castle, "O" : None}
-        tower.exits = {"N" : cottage, "E" : None, "S" : None, "O" : None}
-        cave.exits = {"N" : None, "E" : cottage, "S" : forest, "O" : None}
-        cottage.exits = {"N" : None, "E" : None, "S" : tower, "O" : cave}
-        swamp.exits = {"N" : tower, "E" : None, "S" : None, "O" : castle}
-        castle.exits = {"N" : forest, "E" : swamp, "S" : None, "O" : None}
-
+        forest.exits = {"N" : None, "E" : None, "S" : pont, "O" : None, "U": None, "D": None}
+        pont.exits = {"N" : forest, "E" : None, "S" : Magasin, "O" : None, "U": None, "D": None}
+        Magasin.exits = {"N" : pont, "E" : Champs, "S" : None, "O" : None, "U": None, "D": None }
+        Champs.exits = {"N" : None, "E" : None, "S" : Maison_rez_de_chaussée, "O" : Magasin, "U": Maison_étage, "D": Sous-sol}
+        Maison_rez_de_chaussée.exits = {"N" : Champs, "E" : None, "S" : Voiture, "O" : None, "U": None, "D": Sous-sol}
+        Maison_étage.exits = {"N" : None, "E" : None, "S" : None, "O" : None, "U": None, "D": Maison_rez_de_chaussée}
+        Voiture.exits = {"N" : Maison_rez_de_chaussée , "E" : None, "S" : None, "O" : None, "U": None, "D": None}
+        Sous-sol.exits = {"N" : None , "E" : None, "S" : None, "O" : None, "U": Maison_rez_de_chaussée , "D": None}
+      
         # Setup player and starting room
 
         self.player = Player(input("\nEntrez votre nom: "))
