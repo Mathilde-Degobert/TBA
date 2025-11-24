@@ -83,7 +83,7 @@ class Game:
 
         # If the command is not recognized, print an error message
         if command_word not in self.commands.keys():
-            print(" \n \n \n")
+            print(" \n")
         # If the command is recognized, execute it
         else:
             command = self.commands[command_word]
