@@ -33,6 +33,21 @@ class Player():
         self.get_history()
         return True
 
+    def go_back(self):
+        # Check if there is a previous room in history.
+        if len(self.history) <= 1:
+            print("\nVous ne pouvez pas revenir en arrière !\n")
+            return False
+        
+        # Remove the current room from history and set the current room to the previous room.
+        self.history.pop()  # Remove current room
+        previous_room = self.history[-1]  # Get previous room
+        self.current_room = previous_room
+        print(self.current_room.get_long_description())
+        self.get_history()
+        return True
+            
+
     # Define the history method.
     def get_history(self):
         print("\nVous avez déjà visité les lieux suivants :")

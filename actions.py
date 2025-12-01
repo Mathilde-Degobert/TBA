@@ -44,7 +44,8 @@ class Actions:
         False
 
         """
-        
+
+    
         player = game.player
         l = len(list_of_words)
         # If the number of parameters is incorrect, print an error message and return False.
@@ -143,4 +144,30 @@ class Actions:
         for command in game.commands.values():
             print("\t- " + str(command))
         print()
+        return True
+
+     def history(game):
+        """
+        Move the player in the direction specified by the parameter.
+        The parameter must be a cardinal direction (N, E, S, O).
+
+        Args:
+            game (Game): The game object.
+
+        Returns:
+            bool: True if the command was executed successfully, False otherwise.
+
+        Examples:
+        
+        >>> from game import Game
+        >>> game = Game()
+        >>> game.setup()
+        >>> history(game)
+        True
+        >>> history(game, ["history"])
+        False
+
+        """
+        player = game.player
+        player.get_history()
         return True
