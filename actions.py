@@ -146,14 +146,15 @@ class Actions:
         print()
         return True
 
-     def history(game):
+    def history(game, list_of_words, number_of_parameters):
         """
         Move the player in the direction specified by the parameter.
         The parameter must be a cardinal direction (N, E, S, O).
 
         Args:
             game (Game): The game object.
-
+            list_of_words (list): The list of words in the command.
+            number_of_parameters (int): The number of parameters expected by the command.
         Returns:
             bool: True if the command was executed successfully, False otherwise.
 
@@ -168,6 +169,11 @@ class Actions:
         False
 
         """
+        l = len(list_of_words)
+        if l != number_of_parameters + 1:
+            command_word = list_of_words[0]
+            print(MSG0.format(command_word=command_word))
+            return False
         player = game.player
         player.get_history()
         return True
