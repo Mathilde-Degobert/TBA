@@ -216,3 +216,64 @@ class Actions:
         player = game.player
         print(player.current_room.get_long_description())
         player.current_room.get_inventory()
+
+    def take(game, list_of_words, number_of_parameters):
+        """
+        takes an item from the current room and adds it to the player's inventory.
+
+        Args:
+            game (Game): The game object.
+            list_of_words (list): The list of words in the command.
+            number_of_parameters (int): The number of parameters expected by the command.
+        Returns:
+            bool: True if the item was taken successfully, False otherwise.
+        """
+        l = len(list_of_words)
+        if l != number_of_parameters + 1:
+            command_word = list_of_words[0]
+            print(MSG1.format(command_word=command_word))
+            return False
+        player = game.player
+        item_name = list_of_words[1].lower()
+
+        # Check if the item is in the current room.
+        if item_name not in player.current_room.items:
+            print(f"\nL'objet '{item_name}' n'est pas dans la pièce.\n")
+            return False
+        
+        # Take the item from the room and add it to the player's inventory.
+        item = player.current_room.items.pop(item_name)
+        player.inventory[item_name] = item
+        print(f"\nVous avez pris '{item_name}'.\n")
+        return True 
+
+    def drop(game, list_of_words, number_of_parameters):
+        """
+        drops an item from the player's inventory and adds it to the current room.
+
+        Args:
+            game (Game): The game object.
+            list_of_words (list): The list of words in the command.
+            number_of_parameters (int): The number of parameters expected by the command.
+        Returns:
+            bool: True if the item was dropped successfully, False otherwise
+        """
+        l = len(list_of_words)
+        if l != number_of_parameters + 1:
+            command_word = list_of_words[0]
+            print(MSG1.format(command_word=command_word))
+            return False
+        player = game.player
+        item_name = list_of_words[1].lower()
+
+        # Check if the item is in the player's inventory.
+        if item_name not in player.inventory:
+            print(f"\nL'objet '{item_name}' n'est pas dans votre inventaire.\n")
+            return False
+        
+        # Drop the item from the player's inventory and add it to the current room.
+        item = player.inventory.pop(item_name)
+        player.current_room.items[item_name] = item
+        print(f"\nVous avez déposé '{item_name}'.\n")
+        return True
+

@@ -51,3 +51,5 @@ class Room:
             for item_name, item in self.items.items():
                 print(f"- {item}")
             return True
+
+            """ne marche pas quand on fait back !!"""

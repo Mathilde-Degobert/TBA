@@ -33,6 +33,10 @@ class Game:
         self.commands["back"] = back
         look = Command("look", " : observer la pièce actuelle", Actions.look, 0)
         self.commands["look"] = look
+        take = Command("take", " <item> : prendre un objet dans la pièce", Actions.take, 1)
+        self.commands["take"] = take
+        drop = Command("drop", " <item> : déposer un objet de l'inventaire dans la pièce", Actions.drop, 1)     
+        self.commands["drop"] = drop
         # Setup rooms
 
         forest = Room("Forest", " un sentier sombre, une cabane abandonnée et le bruit assourdissant d'une cascade.")
