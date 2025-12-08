@@ -15,6 +15,7 @@ class Player():
         self.name = name
         self.current_room = None
         self.history = []
+        self.inventory = {}
             
     # Define the move method.
     def move(self, direction):
@@ -27,31 +28,30 @@ class Player():
             return False
         
         # Set the current room to the next room.
-        self.history.append(next_room)
+        self.history.append(self.current_room)
         self.current_room = next_room
         print(self.current_room.get_long_description())
         self.get_history()
         return True
 
-    def go_back(self):
-        # If the history has less than 2 entries, there's no previous room to go back to.
-        if len(self.history) <= 1:
-            print("\nVous n'avez pas d'historique de déplacement.\n")
-            return False
-        # Remove the current room from history
-        self.history.pop()
-        # Get the previous room (now the last element)
-        previous_room = self.history[-1]
-        # Set the current room to the previous room
-        self.current_room = previous_room
-        print(self.current_room.get_long_description())
-        self.get_history()
-        return True
-
-
 
     # Define the history method.
     def get_history(self):
-        print("\nVous avez déjà visité les lieux suivants :")
-        for room in self.history:
-            print(f"- {room.name}")
+        if self.history == []:
+            print("\nVous n'avez pas encore visité de pièces.\n")
+            return False
+        
+        else :
+            print("\nVous avez déjà visité les lieux suivants :")
+            for room in self.history:
+                print(f"- {room.name}")
+
+    def get_inventory(self):
+        if not self.inventory :
+            print("\nIl n'y a rien ici.\n")
+            return False
+        
+        else :
+            print("\nLa pièce contient :")
+            for item, quantity in self.inventory.items():
+                print(f"- {item} (x{quantity})")

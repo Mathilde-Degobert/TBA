@@ -168,7 +168,7 @@ class Actions:
 
     def go_back(game, list_of_words, number_of_parameters):
         """
-        gets the history of rooms visited by the player.
+        goes back to the last place visited by the player.
 
         Args:
             game (Game): The game object.
@@ -177,11 +177,64 @@ class Actions:
         Returns:
             str: The list of places visited by the player.
         """
+
         l = len(list_of_words)
         if l != number_of_parameters + 1:
             command_word = list_of_words[0]
             print(MSG0.format(command_word=command_word))
             return False
         player = game.player
-        player.go_back()
+
+        # If there is no history, print an error message and return False.
+        if not player.history:
+            print("\nVous n'avez pas de pièce précédente à laquelle revenir !\n")
+            return False
+        
+        # Set the current room to the last room in the history.
+        player.current_room = player.history.pop()
+        print(player.current_room.get_long_description())
+        player.get_history()
         return True
+
+    def look(game, list_of_words, number_of_parameters):
+        """
+        looks around the current room.
+
+        Args:
+            game (Game): The game object.
+            list_of_words (list): The list of words in the command.
+            number_of_parameters (int): The number of parameters expected by the command.
+        Returns:
+            str: The description of the current room.
+        """
+
+        l = len(list_of_words)
+        if l != number_of_parameters + 1:
+            command_word = list_of_words[0]
+            print(MSG0.format(command_word=command_word))
+            return False
+        player = game.player
+        print(player.current_room.get_long_description())
+        player.get_inventory()
+
+    def take(game, list_of_words, number_of_parameters):
+        """
+        takes an item from the current room and adds it to the player's inventory.
+
+        Args:
+            game (Game): The game object.
+            list_of_words (list): The list of words in the command.
+            number_of_parameters (int): The number of parameters expected by the command.
+        Returns:
+            bool: True if the item was taken successfully, False otherwise.
+        """
+
+        l = len(list_of_words)
+        if l != number_of_parameters + 1:
+            command_word = list_of_words[0]
+            print(MSG1.format(command_word=command_word))
+            return False
+        
+        item_name = list_of_words[1]
+        player = game.player
+        return player.take(item_name)

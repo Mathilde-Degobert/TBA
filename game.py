@@ -31,6 +31,8 @@ class Game:
         self.commands["history"] = history
         back = Command("back", " : revenir à la pièce précédente", Actions.go_back, 0)
         self.commands["back"] = back
+        take = Command("take", " <item> : prendre un objet", Actions.take, 1)
+        self.commands["take"] = take
         
         # Setup rooms
 
@@ -62,6 +64,12 @@ class Game:
         Voiture.exits = {"N" : Maison_rez_de_chaussée , "E" : None, "S" : None, "O" : None, "U": None, "D": None}
         Sous_sol.exits = {"N" : None , "E" : None, "S" : None, "O" : None, "U": Maison_rez_de_chaussée, "D": None}
       
+        # Add items to rooms
+        Magasin.add_item("clé", 1)
+        Magasin.add_item("torche", 2)
+        Sous_sol.add_item("trésor", 1)
+        forest.add_item("noix", 5)
+        
         # Setup player and starting room
 
         self.player = Player(input("\nEntrez votre nom: "))
