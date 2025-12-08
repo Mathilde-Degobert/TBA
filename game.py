@@ -31,6 +31,8 @@ class Game:
         self.commands["history"] = history
         back = Command("back", " : revenir à la pièce précédente", Actions.go_back, 0)
         self.commands["back"] = back
+        look = Command("look", " : observer la pièce actuelle", Actions.look, 0)
+        self.commands["look"] = look
         # Setup rooms
 
         forest = Room("Forest", " un sentier sombre, une cabane abandonnée et le bruit assourdissant d'une cascade.")
