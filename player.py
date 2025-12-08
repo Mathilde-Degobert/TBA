@@ -31,6 +31,8 @@ class Player():
         self.history.append(self.current_room)
         self.current_room = next_room
         print(self.current_room.get_long_description())
+        self.current_room.get_inventory()
+        self.get_inventory()
         self.get_history()
         return True
 
@@ -47,11 +49,12 @@ class Player():
                 print(f"- {room.name}")
 
     def get_inventory(self):
+        """Display the player's inventory."""
         if not self.inventory :
-            print("\nIl n'y a rien ici.\n")
+            print("\nVotre inventaire est vide.\n")
             return False
         
         else :
-            print("\nLa pièce contient :")
-            for item, quantity in self.inventory.items():
-                print(f"- {item} (x{quantity})")
+            print("\nVotre inventaire contient :")
+            for item_name, item in self.inventory.items():
+                print(f"- {item}")

@@ -6,7 +6,7 @@ from room import Room
 from player import Player
 from command import Command
 from actions import Actions
-
+from item import Item
 class Game:
 
     # Constructor
@@ -31,9 +31,6 @@ class Game:
         self.commands["history"] = history
         back = Command("back", " : revenir à la pièce précédente", Actions.go_back, 0)
         self.commands["back"] = back
-        take = Command("take", " <item> : prendre un objet", Actions.take, 1)
-        self.commands["take"] = take
-        
         # Setup rooms
 
         forest = Room("Forest", " un sentier sombre, une cabane abandonnée et le bruit assourdissant d'une cascade.")
@@ -65,10 +62,34 @@ class Game:
         Sous_sol.exits = {"N" : None , "E" : None, "S" : None, "O" : None, "U": Maison_rez_de_chaussée, "D": None}
       
         # Add items to rooms
-        Magasin.add_item("clé", 1)
-        Magasin.add_item("torche", 2)
-        Sous_sol.add_item("trésor", 1)
-        forest.add_item("noix", 5)
+        forest.items = {
+            "Modulateur": Item("Modulateur", "Module d'amplification", 1),
+        }
+        pont.items = {
+            "batterie": Item("batterie", "vieille batterie", 1),
+        }
+        Magasin.items = {
+            "piles": Item("piles", "boîte de 4 piles", 0.5),
+            "radio": Item("radio", "vieille radio", 2),
+            "jouet": Item("jouet", "petit avion avec un speaker des lumieres", 1)
+        }
+        Champs.items = {
+            "transformateur": Item("transformateur", "un vieux transformateur électrique", "3")
+        }
+        Maison_rez_de_chaussée.items = {
+            "clé": Item("clé", "une clé menant vers l'étage", 0.5)
+        }
+        Maison_étage.items = {
+            "microphone": Item("microphone", "un microphone du babyphone", 0.5)
+        }
+        Voiture.items = {
+            "clés": Item("clés", "les clés menant au sous-sol", 0.5),
+            "Câbles": Item("Câbles", "des câbles électriques", 1)
+        }
+        Sous_sol.items = {
+            "outils": Item("outils", "des outils divers", 2),
+        }
+        
         
         # Setup player and starting room
 
@@ -107,6 +128,8 @@ class Game:
         print("Entrez 'help' si vous avez besoin d'aide.")
         #
         print(self.player.current_room.get_long_description())
+        self.player.current_room.get_inventory()
+        self.player.get_inventory()
     
 
 def main():
