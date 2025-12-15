@@ -136,8 +136,6 @@ class Game:
         print("Entrez 'help' si vous avez besoin d'aide.")
         #
         print(self.player.current_room.get_long_description())
-        self.player.current_room.get_inventory()
-        self.player.get_inventory()
     
 
 def main():
