@@ -277,23 +277,23 @@ class Actions:
         print(f"\nVous avez déposé '{item_name}'.\n")
         return True
 
-def check(game, list_of_words, number_of_parameters):
-    """
-    checks the player's inventory.
+    def check(game, list_of_words, number_of_parameters):
+        """
+        checks the player's inventory.
 
-    Args:
-        game (Game): The game object.
-        list_of_words (list): The list of words in the command.
-        number_of_parameters (int): The number of parameters expected by the command.
-    Returns:
-        str: The description of the player's inventory.
-    """
+        Args:
+            game (Game): The game object.
+            list_of_words (list): The list of words in the command.
+            number_of_parameters (int): The number of parameters expected by the command.
+        Returns:
+            bool: True if the inventory was checked successfully, False otherwise.
+        """
 
-    l = len(list_of_words)
-    if l != number_of_parameters + 1:
-        command_word = list_of_words[0]
-        print(MSG0.format(command_word=command_word))
-        return False
-    player = game.player
-    player.get_inventory()
-    return True 
+        l = len(list_of_words)
+        if l != number_of_parameters + 1:
+            command_word = list_of_words[0]
+            print(MSG0.format(command_word=command_word))
+            return False
+        player = game.player
+        player.get_inventory()
+        return True
