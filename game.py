@@ -37,6 +37,8 @@ class Game:
         self.commands["take"] = take
         drop = Command("drop", " <item> : déposer un objet de l'inventaire dans la pièce", Actions.drop, 1)     
         self.commands["drop"] = drop
+        check = Command("check", " : vérifier le contenu de l'inventaire", Actions.check, 0)
+        self.commands["check"] = check
         # Setup rooms
 
         forest = Room("Forest", " un sentier sombre, une cabane abandonnée et le bruit assourdissant d'une cascade.")
@@ -69,7 +71,7 @@ class Game:
       
         # Add items to rooms
         forest.items = {
-            "Modulateur": Item("Modulateur", "Module d'amplification", 1),
+            "modulateur": Item("modulateur", "Module d'amplification", 1),
         }
         pont.items = {
             "batterie": Item("batterie", "vieille batterie", 1),
@@ -90,7 +92,7 @@ class Game:
         }
         Voiture.items = {
             "clés": Item("clés", "les clés menant au sous-sol", 0.5),
-            "Câbles": Item("Câbles", "des câbles électriques", 1)
+            "câbles": Item("câbles", "des câbles électriques", 1)
         }
         Sous_sol.items = {
             "outils": Item("outils", "des outils divers", 2),
