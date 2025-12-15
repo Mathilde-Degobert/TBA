@@ -55,4 +55,11 @@ class Player():
         else :
             print("\nVotre inventaire contient :")
             for item_name, item in self.inventory.items():
-                print(f"- {item}")
+                    print(f"- {item}")
+
+    def get_weight(self):
+        """Return the total weight of items in the player's inventory (in kg)."""
+        total = 0.0
+        for item in self.inventory.values():
+            total += item.weight
+        return total

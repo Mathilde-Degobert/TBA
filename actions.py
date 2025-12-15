@@ -242,10 +242,27 @@ class Actions:
             return False
         
         # Take the item from the room and add it to the player's inventory.
-        item = player.current_room.items.pop(item_name)
-        player.inventory[item_name] = item
-        print(f"\nVous avez pris '{item_name}'.\n")
-        return True 
+        if player.get_weight() + player.current_room.items[item_name].weight > player.max_weight:
+            print(f"\nVous ne pouvez pas prendre '{item_name}' car cela dépasserait votre limite de poids.\n")
+            return False
+        else :
+            item = player.current_room.items.pop(item_name)
+            player.inventory[item_name] = item
+            print(f"\nVous avez pris '{item_name}'.\n")
+            return True 
+
+    def get_weight(game, list_of_words, number_of_parameters):
+        """
+        gets the current weight of the player's inventory.
+
+        Args:
+            game (Game): The game object.
+        Returns:
+            bool: True if the current weight is within the limit, False otherwise.
+        """
+        player = game.player
+        total_weight = sum(item.weight for item in player.inventory.values())
+        return total_weight <= player.max_weight
 
     def drop(game, list_of_words, number_of_parameters):
         """

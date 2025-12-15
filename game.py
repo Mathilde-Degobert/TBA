@@ -71,10 +71,10 @@ class Game:
       
         # Add items to rooms
         forest.items = {
-            "modulateur": Item("modulateur", "Module d'amplification", 1),
+            "modulateur": Item("modulateur", "Module d'amplification", 4),
         }
         pont.items = {
-            "batterie": Item("batterie", "vieille batterie", 1),
+            "batterie": Item("batterie", "vieille batterie", 2),
         }
         Magasin.items = {
             "piles": Item("piles", "boîte de 4 piles", 0.5),
