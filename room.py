@@ -52,4 +52,3 @@ class Room:
                 print(f"- {item}")
             return True
 
-            """ne marche pas quand on fait back !!"""

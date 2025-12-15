@@ -16,6 +16,7 @@ class Player():
         self.current_room = None
         self.history = []
         self.inventory = {}
+        self.max_weight = 8.0  
             
     # Define the move method.
     def move(self, direction):
