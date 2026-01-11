@@ -215,7 +215,20 @@ class Actions:
             return False
         player = game.player
         print(player.current_room.get_long_description())
+        # Show items in the room
         player.current_room.get_inventory()
+        # Show characters (PNJ) present in the same room
+        npcs = []
+        for c in getattr(game, 'character', []):
+            if getattr(c, 'current_room', None) is player.current_room or getattr(getattr(c, 'current_room', None), 'name', None) == getattr(player.current_room, 'name', None):
+                npcs.append(c)
+        if npcs:
+            print("\nPersonnes présentes :")
+            for c in npcs:
+                # show name and short description if available
+                desc = getattr(c, 'description', '')
+                print(f"- {c.name} : {desc}")
+        return True
 
     def take(game, list_of_words, number_of_parameters):
         """
@@ -300,4 +313,9 @@ class Actions:
             return False
         player = game.player
         player.get_inventory()
+        return True
+
+    def move_pnj(game, list_of_words, number_of_parameters):
+        for character in game.character:
+            character.move()
         return True

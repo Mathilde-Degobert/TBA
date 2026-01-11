@@ -7,7 +7,10 @@ from player import Player
 from command import Command
 from actions import Actions
 from item import Item
-from charcater import character
+from character import Character
+
+# Debug flag
+DEBUG = False
 
 class Game:
 
@@ -17,6 +20,7 @@ class Game:
         self.rooms = []
         self.commands = {}
         self.player = None
+        self.character = []
     
     # Setup the game
     def setup(self):
@@ -102,16 +106,16 @@ class Game:
         }
         
         # Setup Character
-        Beau_Abbot = Character("Beau Abbot", "Le cadet de la famille Abbot, agé d'a peine 4 ans. Il vous regarde de ses petits yeux innocents.", )
+        Beau_Abbot = Character("Beau Abbot", "Le cadet de la famille Abbot, agé d'a peine 4 ans. Il vous regarde de ses petits yeux innocents.", Maison_rez_de_chaussée)
         self.character.append(Beau_Abbot)
-        Marcus_Abbot = Character("Marcus Abbot", "Le deuxième fils de la famille Abbot, agé de 12 ans, il fuit votre regard, apeuré.")
+        Marcus_Abbot = Character("Marcus Abbot", "Le deuxième fils de la famille Abbot, agé de 12 ans, il fuit votre regard, apeuré.", Maison_étage)
         self.character.append(Marcus_Abbot)
-        Lee_Abbot = Character("Lee Abbot", "Le père de famille, un homme d'une quarantaine d'années, il semble tendu.")
+        Lee_Abbot = Character("Lee Abbot", "Le père de famille, un homme d'une quarantaine d'années, il semble tendu.", Maison_rez_de_chaussée)
         self.character.append(Lee_Abbot)
-        Evelyn_Abbot = Character("Evelyn Abbot", "la mère de la famille, enceinte et très protectrice de ses enfants" )
+        Evelyn_Abbot = Character("Evelyn Abbot", "la mère de la famille, enceinte et très protectrice de ses enfants", Maison_étage)
         self.character.append(Evelyn_Abbot)
-        Femme_dans_la_foret = Character("La femme dans la forêt", "une vieille dame perdue rendue folle par le deuil" )
-        seil.character.append(Femme_dans_la_foret)
+        Femme_dans_la_foret = Character("La femme dans la forêt", "une vieille dame perdue rendue folle par le deuil", forest)
+        self.character.append(Femme_dans_la_foret)
         
         # Setup player and starting room
 
@@ -125,6 +129,7 @@ class Game:
         # Loop until the game is finished
         while not self.finished:
             # Get the command from the player
+            Actions.move_pnj(self, [], 0)
             self.process_command(input("> "))
         return None
 
