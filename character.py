@@ -34,3 +34,10 @@ class Character():
         if DEBUG:
             print(f"DEBUG : {self.name} se déplace vers {next_room.name}")
         return True
+    #def get_msg(self):
+        #if not self.msgs:
+         #  return "None"
+        #msg = self.msgs.pop(0)
+        #print(f"\n{msg}\n")
+        #self.msgs.append(msg)
+        #return True
