@@ -45,6 +45,8 @@ class Game:
         self.commands["drop"] = drop
         check = Command("check", " : vérifier le contenu de l'inventaire", Actions.check, 0)
         self.commands["check"] = check
+        talk = Command("talk", " <character> : parler à un personnage", Actions.talk, 1)
+        self.commands["talk"] = talk
 
         # Setup rooms
 
@@ -107,14 +109,19 @@ class Game:
         
         # Setup Character
         Beau_Abbot = Character("Beau Abbot", "Le cadet de la famille Abbot, agé d'a peine 4 ans. Il vous regarde de ses petits yeux innocents.", Maison_rez_de_chaussée)
+        Beau_Abbot.msgs = ["Bonjour", "Je m'appelle Beau"]
         self.character.append(Beau_Abbot)
         Marcus_Abbot = Character("Marcus Abbot", "Le deuxième fils de la famille Abbot, agé de 12 ans, il fuit votre regard, apeuré.", Maison_étage)
+        Marcus_Abbot.msgs = ["Bonjour", "Je m'appelle Marcus"]
         self.character.append(Marcus_Abbot)
         Lee_Abbot = Character("Lee Abbot", "Le père de famille, un homme d'une quarantaine d'années, il semble tendu.", Maison_rez_de_chaussée)
+        Lee_Abbot.msgs = ["Bonjour", "Je m'appelle Lee"]
         self.character.append(Lee_Abbot)
         Evelyn_Abbot = Character("Evelyn Abbot", "la mère de la famille, enceinte et très protectrice de ses enfants", Maison_étage)
+        Evelyn_Abbot.msgs = ["Bonjour", "Je m'appelle Evelyn"]
         self.character.append(Evelyn_Abbot)
         Femme_dans_la_foret = Character("La femme dans la forêt", "une vieille dame perdue rendue folle par le deuil", forest)
+        Femme_dans_la_foret.msgs = ["Bonjour", "Je m'appelle... je ne me souviens plus"]
         self.character.append(Femme_dans_la_foret)
         
         # Setup player and starting room
@@ -129,8 +136,9 @@ class Game:
         # Loop until the game is finished
         while not self.finished:
             # Get the command from the player
-            Actions.move_pnj(self, [], 0)
             self.process_command(input("> "))
+            # Move the PNJs after processing the command
+            Actions.move_pnj(self, [], 0)
         return None
 
     # Process the command entered by the player

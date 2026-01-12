@@ -220,7 +220,7 @@ class Actions:
         # Show characters (PNJ) present in the same room
         npcs = []
         for c in getattr(game, 'character', []):
-            if getattr(c, 'current_room', None) is player.current_room or getattr(getattr(c, 'current_room', None), 'name', None) == getattr(player.current_room, 'name', None):
+            if c.current_room == player.current_room:
                 npcs.append(c)
         if npcs:
             print("\nPersonnes présentes :")
@@ -318,4 +318,45 @@ class Actions:
     def move_pnj(game, list_of_words, number_of_parameters):
         for character in game.character:
             character.move()
+        return True
+
+    def talk(game, list_of_words, number_of_parameters):
+        """
+        Talk to a character in the current room.
+
+        Args:
+            game (Game): The game object.
+            list_of_words (list): The list of words in the command.
+            number_of_parameters (int): The number of parameters expected by the command.
+
+        Returns:
+            bool: True if the command was executed successfully, False otherwise.
+        """
+        l = len(list_of_words)
+        # If the number of parameters is incorrect, print an error message and return False.
+        if l != number_of_parameters + 1:
+            command_word = list_of_words[0]
+            print(MSG1.format(command_word=command_word))
+            return False
+        
+        player = game.player
+        character_name = list_of_words[1].lower()
+        
+        # Find the character in the current room
+        character_found = None
+        for character in game.character:
+            character_first_name = character.name.split()[0].lower()
+            if character.name.lower() == character_name or character_first_name == character_name:
+                # Check if character is in the same room as the player
+                if character.current_room is player.current_room:
+                    character_found = character
+                    break
+        
+        if character_found is None:
+            print(f"\n'{character_name}' n'est pas dans la pièce.\n")
+            return False
+        
+        # Get the message from the character
+        message = character_found.get_msg()
+        print(f"\n{character_found.name} : {message}\n")
         return True

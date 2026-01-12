@@ -18,7 +18,7 @@ class Character():
         self.name = name
         self.description = description
         self.current_room = current_room
-        #self.msgs = []
+        self.msgs = []
 
     def move(self):
         from game import DEBUG
@@ -34,10 +34,10 @@ class Character():
         if DEBUG:
             print(f"DEBUG : {self.name} se déplace vers {next_room.name}")
         return True
-    #def get_msg(self):
-        #if not self.msgs:
-         #  return "None"
-        #msg = self.msgs.pop(0)
-        #print(f"\n{msg}\n")
-        #self.msgs.append(msg)
-        #return True
+    def get_msg(self):
+        if not self.msgs:
+            return "None"
+        msg = self.msgs.pop(0)
+        print(f"\n{msg}\n")
+        self.msgs.append(msg)
+        return True
