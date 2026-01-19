@@ -14,7 +14,6 @@ class Room:
         self.name = name
         self.description = description
         self.exits = {}
-        self.inventory = {}
         self.items = {}
     
     # Define the get_exit method.

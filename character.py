@@ -8,7 +8,6 @@ class Character():
     Attributes:
         name (str): The name of the character.
         description (str): A brief description of the character.
-        current_room (Room): The room where the character is currently located.
         msgs (list): A list of messages associated with the character.
         
     """
@@ -17,7 +16,6 @@ class Character():
     def __init__(self, name: str, description: str, current_room): #msg : list
         self.name = name
         self.description = description
-        self.current_room = current_room
         self.msgs = []
 
     def move(self):

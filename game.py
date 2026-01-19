@@ -83,7 +83,7 @@ class Game:
             "modulateur": Item("modulateur", "Module d'amplification", 4),
         }
         pont.items = {
-            "batterie": Item("batterie", "vieille batterie", 2),
+            "batterie": Item("batterie", "vieille batterie", 2)
         }
         Magasin.items = {
             "piles": Item("piles", "boîte de 4 piles", 3),
@@ -104,7 +104,7 @@ class Game:
             "câbles": Item("câbles", "des câbles électriques", 1)
         }
         Sous_sol.items = {
-            "outils": Item("outils", "des outils divers", 2),
+            "outils": Item("outils", "des outils divers", 2)
         }
         
         # Setup Character
