@@ -137,8 +137,6 @@ class Game:
         while not self.finished:
             # Get the command from the player
             self.process_command(input("> "))
-            # Move the PNJs after processing the command
-            Actions.move_pnj(self, [], 0)
         return None
 
     # Process the command entered by the player

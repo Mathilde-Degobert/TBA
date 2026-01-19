@@ -16,7 +16,9 @@ class Character():
     def __init__(self, name: str, description: str, current_room): #msg : list
         self.name = name
         self.description = description
+        self.current_room = current_room
         self.msgs = []
+        self.message_index = 0  # Track position dans la conversation
 
     def move(self):
         from game import DEBUG
@@ -35,7 +37,10 @@ class Character():
     def get_msg(self):
         if not self.msgs:
             return "None"
-        msg = self.msgs.pop(0)
+        msg = self.msgs[self.message_index]  # Accéder sans pop
         print(f"\n{msg}\n")
-        self.msgs.append(msg)
+        self.message_index = (self.message_index + 1) % len(self.msgs)  # Avancer et boucler
+        # Se déplacer seulement quand on revient au début du cycle (dialogue terminé)
+        if self.message_index == 0:
+            self.move()
         return True
