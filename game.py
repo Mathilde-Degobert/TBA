@@ -147,7 +147,7 @@ class Game:
 
 
     #setup quests
-    def_setup_quests(self):
+    def setup_quests(self):
         """Initialize all quests."""
         exploration_quest = Quest(
             title="Grand Explorateur",
