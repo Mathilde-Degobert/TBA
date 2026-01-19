@@ -152,11 +152,14 @@ class Game:
         exploration_quest = Quest(
             title="Grand Explorateur",
             description="Explorez tous les lieux de ce monde mystérieux.",
-            objectives=["Visiter Forest"
-                        , "Visiter Tower"
-                        , "Visiter Cave"
-                        , "Visiter Cottage"
-                        , "Visiter Castle"],
+            objectives=["Visiter Magasin"
+                        , "Visiter forest"
+                        , "Visiter Champs"
+                        , "Visiter pont"
+                        , "Visiter Maison_rez_de_chaussée"
+                        , "Visiter Maison_étage"
+                        , "Visiter Voiture"
+                        , "Visiter Sous_sol"],
             reward="Titre de Grand Explorateur"
         )
 
@@ -165,18 +168,30 @@ class Game:
             title="Grand Voyageur",
             description="Déplacez-vous 10 fois entre les lieux.",
             objectives=["Se déplacer 10 fois"],
-            reward="Bottes de voyageur"
+            reward="lampe torche"
         )
 
 
         discovery_quest = Quest(
-            title="Découvreur de Secrets",
-            description="Découvrez les trois lieux les plus mystérieux.",
-            objectives=["Visiter Cave"
-                        , "Visiter Tower"
-                        , "Visiter Castle"],
-            reward="Clé dorée"
+            title="passepartout",
+            description="parvenez à entrer à l'étage.",
+            objectives=["Visiter Maison_étage"],
+            reward="clé à molette"
         )
+
+    def loose_quests(self):
+        """Initialize loose quests."""
+        die_quest = Quest(
+            title="mort tragique",
+            description="vous faites le mauvais choix et vous faites tuer par une créature",
+            objectives=["prendre les piles", "parler a la femme dans la forêt"],
+            reward="bandeau de deuil"
+        )
+
+    def win_quests(self):
+        """Initialize win quests."""
+
+
 
       # Add quests to player's quest manager
         self.player.quest_manager.add_quest(exploration_quest)
