@@ -8,6 +8,7 @@ from command import Command
 from actions import Actions
 from item import Item
 from character import Character
+from quest import quest
 
 # Debug flag
 DEBUG = False
@@ -47,6 +48,21 @@ class Game:
         self.commands["check"] = check
         talk = Command("talk", " <character> : parler à un personnage", Actions.talk, 1)
         self.commands["talk"] = talk
+        
+        self.commands["quest"] = Command("quest"
+                                         , " <titre> : afficher les détails d'une quête"
+                                         , Actions.quest
+                                         , 1)
+        self.commands["activate"] = Command("activate"
+                                            , " <titre> : activer une quête"
+                                            , Actions.activate
+                                            , 1)
+        self.commands["rewards"] = Command("rewards"
+                                           , " : afficher vos récompenses"
+                                           , Actions.rewards
+                                           , 0)
+
+
 
         # Setup rooms
 
@@ -129,6 +145,46 @@ class Game:
         self.player = Player(input("\nEntrez votre nom: "))
         self.player.current_room = Magasin
 
+
+    #setup quests
+    def_setup_quests(self):
+        """Initialize all quests."""
+        exploration_quest = Quest(
+            title="Grand Explorateur",
+            description="Explorez tous les lieux de ce monde mystérieux.",
+            objectives=["Visiter Forest"
+                        , "Visiter Tower"
+                        , "Visiter Cave"
+                        , "Visiter Cottage"
+                        , "Visiter Castle"],
+            reward="Titre de Grand Explorateur"
+        )
+
+
+        travel_quest = Quest(
+            title="Grand Voyageur",
+            description="Déplacez-vous 10 fois entre les lieux.",
+            objectives=["Se déplacer 10 fois"],
+            reward="Bottes de voyageur"
+        )
+
+
+        discovery_quest = Quest(
+            title="Découvreur de Secrets",
+            description="Découvrez les trois lieux les plus mystérieux.",
+            objectives=["Visiter Cave"
+                        , "Visiter Tower"
+                        , "Visiter Castle"],
+            reward="Clé dorée"
+        )
+
+      # Add quests to player's quest manager
+        self.player.quest_manager.add_quest(exploration_quest)
+        self.player.quest_manager.add_quest(travel_quest)
+        self.player.quest_manager.add_quest(discovery_quest)
+
+
+
     # Play the game
     def play(self):
         self.setup()
@@ -147,9 +203,11 @@ class Game:
 
         command_word = list_of_words[0]
 
-        # If the command is not recognized, print an error message
-        if command_word not in self.commands.keys():
-            print(" \n")
+         # If the command is not recognized, print an error message
+        if command_word not in self.commands:
+            msg1 = f"\nCommande '{command_word}' non reconnue."
+            msg2 = " Entrez 'help' pour voir la liste des commandes disponibles.\n"
+            print(msg1 + msg2)
         # If the command is recognized, execute it
         else:
             command = self.commands[command_word]
