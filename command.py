@@ -38,6 +38,7 @@ class Command:
     
     # The string representation of the command.
     def __str__(self):
+        """ Returns a string representation of the command. """
         return  self.command_word \
                 + self.help_string
     

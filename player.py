@@ -20,7 +20,7 @@ class Player():
         self.history = []
         self.inventory = {}
         self.max_weight = 8.0  
-         self.move_count = 0
+        self.move_count = 0
         self.quest_manager = QuestManager(self)
         self.rewards = []  # List to store earned rewards
 

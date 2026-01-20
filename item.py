@@ -14,23 +14,10 @@ class Item:
     """
     
     def __init__(self, name, description, weight):
-        """
-        Initialize an Item.
-        
-        Args:
-            name (str): The name of the item.
-            description (str): The description of the item.
-            weight (float): The weight of the item in kg.
-        """
         self.name = name
         self.description = description
         self.weight = weight
     
     def __str__(self):
-        """
-        Return a textual representation of the item.
-        
-        Returns:
-            str: A formatted string with the item's name, description, and weight.
-        """
-        return f"{self.name} : {self.description} ({self.weight} kg)"
+        """ Returns a textual representation of the item."""
+        return f"{self.name} : {self.description} ({self.weight} g)"
