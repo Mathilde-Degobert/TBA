@@ -7,7 +7,7 @@ class Room:
         Attributes:
             name (str): The name of the room.
             description (str): The description of the room.
-            exits (dictionnaire): The different exits possible.out
+            exits (dictionnaire): The different exits possible.
     """
     # Define the constructor. 
     def __init__(self, name, description):
@@ -15,6 +15,7 @@ class Room:
         self.description = description
         self.exits = {}
         self.items = {}
+        self.characters = {}
     
     # Define the get_exit method.
     def get_exit(self, direction):
@@ -40,7 +41,10 @@ class Room:
 
     # Display the items in the room.
     def get_inventory(self):
-        """Display items available in the room."""
+        """Display items available in the room.
+        Returns:
+            bool: True if there are items, False otherwise.
+        """
         if not self.items:
             print("\nIl n'y a rien ici.\n")
             return False

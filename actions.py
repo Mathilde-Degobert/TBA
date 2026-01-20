@@ -218,16 +218,10 @@ class Actions:
         # Show items in the room
         player.current_room.get_inventory()
         # Show characters (PNJ) present in the same room
-        npcs = []
-        for c in getattr(game, 'character', []):
-            if c.current_room == player.current_room:
-                npcs.append(c)
-        if npcs:
+        if player.current_room.characters:
             print("\nPersonnes présentes :")
-            for c in npcs:
-                # show name and short description if available
-                desc = getattr(c, 'description', '')
-                print(f"- {c.name} : {desc}")
+            for character_name, character in player.current_room.characters.items():
+                print(f"- {character.name} : {character.description}")
         return True
 
     def take(game, list_of_words, number_of_parameters):
@@ -254,8 +248,40 @@ class Actions:
             print(f"\nL'objet '{item_name}' n'est pas dans la pièce.\n")
             return False
         
-        # Take the item from the room and add it to the player's inventory.
-        if player.get_weight() + float(player.current_room.items[item_name].weight) > player.max_weight:
+        # Chercher une quête liée à cet item
+        quest_for_item = None
+        for quest in game.quests:
+            if not quest.is_complete():
+                current_step = quest.get_current_step()
+                if current_step and current_step.reward and current_step.reward.name == item_name:
+                    quest_for_item = quest
+                    break
+        
+        # Si une quête est liée à cet item, afficher l'étape de quête
+        if quest_for_item:
+            current_step = quest_for_item.get_current_step()
+            print(f"\n{current_step.description}\n")
+            
+            # Afficher les réponses de la quête
+            response = current_step.get_current_response()
+            if response:
+                print(response)
+            
+            # Gérer les choix
+            if current_step.get_current_choices():
+                if Actions.handle_choices(current_step, quest_for_item):
+                    # Si tous les choix sont corrects, on peut prendre l'item
+                    quest_for_item.advance()
+                else:
+                    # Les mauvais choix, on ne prend pas l'item
+                    print(f"\nVous n'avez pas pris '{item_name}'.\n")
+                    return False
+            else:
+                # Pas de choix, juste avancer l'étape
+                quest_for_item.advance()
+        
+        # Prendre l'item
+        if player.get_weight() + player.current_room.items[item_name].weight > player.max_weight:
             print(f"\nVous ne pouvez pas prendre '{item_name}' car cela dépasse votre limite de poids.\n")
             return False
         else :
@@ -323,7 +349,6 @@ class Actions:
     def talk(game, list_of_words, number_of_parameters):
         """
         Talk to a character in the current room.
-
         Args:
             game (Game): The game object.
             list_of_words (list): The list of words in the command.
@@ -356,59 +381,222 @@ class Actions:
             print(f"\n'{character_name}' n'est pas dans la pièce.\n")
             return False
         
-        # Get the message from the character
-        message = character_found.get_msg()
-        print(f"\n{character_found.name} : {message}\n")
+        # Cas spécial pour Lee Abbott: vérifier si la quête continue
+        if character_found.name == "Lee Abbot":
+            lee_quest = None
+            for quest in game.quests:
+                if quest.title == "Interagir avec Lee Abbott":
+                    lee_quest = quest
+                    break
+            
+            # Vérifier si le joueur a déjà les clés ET le tournevis
+            has_keys = "clés-étage" in player.inventory
+            has_screwdriver = "tournevis" in player.inventory
+            
+            # Si quête complétée ET a tous les items, terminer
+            if has_keys and has_screwdriver:
+                print(f"\nLee Abbott: Bravo ! Tu as tout ce qu'il te faut. Bonne chance !\n")
+                if lee_quest:
+                    lee_quest.reset_to_step(len(lee_quest.steps))
+                return True
+            
+            # Sinon, proposer les choix restants
+            if lee_quest:
+                current_step = lee_quest.get_current_step()
+                if current_step:
+                    print(f"\n{current_step.description}\n")
+                    response = current_step.get_current_response()
+                    if response:
+                        print(response)
+                    
+                    # Afficher les choix non encore effectués
+                    if current_step.get_current_choices():
+                        choices = current_step.get_current_choices()[0]
+                        # Filtrer les choix selon ce qui a déjà été fait
+                        available_choices = []
+                        for choice in choices:
+                            if choice not in lee_quest.completed_paths:
+                                available_choices.append(choice)
+                        
+                        if available_choices:
+                            print("\nChoix disponibles:")
+                            for i, choice in enumerate(available_choices, 1):
+                                print(f"{i}. {choice}")
+                            
+                            user_input = input("Votre choix: ")
+                            try:
+                                choice_idx = int(user_input) - 1
+                                if 0 <= choice_idx < len(available_choices):
+                                    chosen_option = available_choices[choice_idx]
+                                    print(f"\nVous avez choisi: {chosen_option}\n")
+                                    
+                                    # Marquer ce choix comme complété
+                                    lee_quest.completed_paths.append(chosen_option)
+                                    
+                                    # Avancer et afficher la réaction
+                                    lee_quest.advance()
+                                    next_step = lee_quest.get_current_step()
+                                    
+                                    if next_step:
+                                        print(f"\n{next_step.description}\n")
+                                        response = next_step.get_current_response()
+                                        if response:
+                                            print(response)
+                                        
+                                        # Ajouter la récompense
+                                        if next_step.reward:
+                                            if player.check_inventory_space(next_step.reward.weight):
+                                                player.inventory[next_step.reward.name] = next_step.reward
+                                                print(f"\nVous avez obtenu: {next_step.reward.name}\n")
+                                            else:
+                                                print(f"\n⚠️ Votre inventaire est trop plein pour {next_step.reward.name}.\n")
+                                        
+                                        # Réinitialiser la quête à l'étape 1 pour relancer le dialogue
+                                        lee_quest.reset_to_step(0)
+                            except ValueError:
+                                print("Choix invalide.")
+                                return False
+                        else:
+                            print("\nLee Abbott: Tu as déjà exploré tous tes choix pour le moment...\n")
+                return True
+        
+        # Chercher une quête liée à ce personnage (pour les autres PNJ)
+        quest_for_character = None
+        for quest in game.quests:
+            if not quest.is_complete():
+                current_step = quest.get_current_step()
+                if current_step and current_step.character == character_found.name:
+                    quest_for_character = quest
+                    break
+        
+        # Si une quête est liée à ce personnage, afficher l'étape de quête
+        if quest_for_character:
+            current_step = quest_for_character.get_current_step()
+            print(f"\n{current_step.description}\n")
+            
+            # Afficher les réponses de la quête
+            response = current_step.get_current_response()
+            if response:
+                print(response)
+            
+            # Gérer les choix
+            if current_step.get_current_choices():
+                if Actions.handle_choices(current_step, quest_for_character):
+                    # handle_choices a géré les choix correctement, avancer la quête
+                    quest_for_character.advance()
+                    next_step = quest_for_character.get_current_step()
+                    
+                    if next_step:
+                        # Afficher l'étape suivante
+                        print(f"\n{next_step.description}\n")
+                        response = next_step.get_current_response()
+                        if response:
+                            print(response)
+                        
+                        # Ajouter la récompense
+                        if next_step.reward:
+                            if player.check_inventory_space(next_step.reward.weight):
+                                player.inventory[next_step.reward.name] = next_step.reward
+                                print(f"\nVous avez obtenu: {next_step.reward.name}\n")
+                            else:
+                                print(f"\n⚠️ Votre inventaire est trop plein pour {next_step.reward.name}.\n")
+            else:
+                # Pas de choix, juste avancer l'étape
+                quest_for_character.advance()
+                if current_step.reward:
+                    if player.check_inventory_space(current_step.reward.weight):
+                        player.inventory[current_step.reward.name] = current_step.reward
+                        print(f"\nVous avez obtenu: {current_step.reward.name}\n")
+        else:
+            # Pas de quête liée, juste afficher le message du personnage
+            message = character_found.get_msg()
+            print(f"\n{character_found.name} : {message}\n")
+        
         return True
 
-    def quests(game, list_of_words, number_of_parameters):
+    @staticmethod
+    def use(game, list_of_words, number_of_parameters):
         """
-        Show all quests and their status.
-       
+        Uses an item from the player's inventory or crafts items.
+
         Args:
             game (Game): The game object.
             list_of_words (list): The list of words in the command.
             number_of_parameters (int): The number of parameters expected by the command.
-
-
         Returns:
-            bool: True if the command was executed successfully, False otherwise.
-
-
-        Examples:
-
-
-        >>> from game import Game
-        >>> game = Game()
-        >>> game.setup("TestPlayer")
-        >>> Actions.quests(game, ["quests"], 0)
-        <BLANKLINE>
-        📋 Liste des quêtes:
-          ❓ Grand Explorateur (Non activée)
-          ❓ Grand Voyageur (Non activée)
-          ❓ Découvreur de Secrets (Non activée)
-        <BLANKLINE>
-        True
-        >>> Actions.quests(game, ["quests", "param"], 0)
-        <BLANKLINE>
-        La commande 'quests' ne prend pas de paramètre.
-        <BLANKLINE>
-        False
-
-
+            bool: True if the item was used successfully, False otherwise.
         """
-        # If the number of parameters is incorrect, print an error message and return False.
-        n = len(list_of_words)
-        if n != number_of_parameters + 1:
+        l = len(list_of_words)
+        if l != number_of_parameters + 1:
             command_word = list_of_words[0]
-            print(MSG0.format(command_word=command_word))
+            print(MSG1.format(command_word=command_word))
             return False
+        player = game.player
+        item_name = list_of_words[1].lower()
 
-
-        # Show all quests
-        game.player.quest_manager.show_quests()
-        return True
-
+        # Check if the item is in the player's inventory.
+        if item_name not in player.inventory:
+            print(f"\nL'objet '{item_name}' n'est pas dans votre inventaire.\n")
+            return False
+        
+        item = player.inventory[item_name]
+        
+        # Crafting: Assembler le dispositif d'ultrasons à la table de bricolage avec un outil
+        if "table" in player.current_room.items:
+            # Si on utilise un outil (marteau ou tournevis)
+            if item_name in ["marteau", "tournevis"]:
+                # Vérifier si tous les matériaux requis sont présents
+                materiaux_requis = ["modulateur", "batterie", "piles", "câbles", "microphone", "appareil-auditif", "carte-mère"]
+                inventaire_lower = {k.lower(): v for k, v in player.inventory.items()}
+                
+                materiaux_presents = [mat for mat in materiaux_requis if mat in inventaire_lower]
+                
+                if len(materiaux_presents) == len(materiaux_requis):
+                    print("\n" + "="*60)
+                    print("ASSEMBLAGE DU DISPOSITIF D'ULTRASONS EN COURS...")
+                    print("="*60)
+                    print("Vous utilisez les outils et matériaux:")
+                    print(f"  🔨 Outil utilisé: {item_name}")
+                    print("  📦 Matériaux assemblés:")
+                    print("    ✓ Modulateur d'amplification")
+                    print("    ✓ Batterie/Piles")
+                    print("    ✓ Câbles électriques")
+                    print("    ✓ Microphone")
+                    print("    ✓ Appareil auditif")
+                    print("    ✓ Carte mère")
+                    print("  🔧 Circuits finalisés")
+                    print("="*60)
+                    print("✨ DISPOSITIF D'ULTRASONS CRÉÉ AVEC SUCCÈS !\n")
+                    
+                    # Retirer les matériaux de l'inventaire
+                    for mat in materiaux_requis:
+                        for key in list(player.inventory.keys()):
+                            if key.lower() == mat:
+                                del player.inventory[key]
+                                break
+                    
+                    # Ajouter le dispositif d'ultrasons
+                    from item import Item
+                    dispositif = Item("dispositif", "un dispositif à ultrasons (créé)", 8.0)
+                    player.inventory["dispositif"] = dispositif
+                    
+                    # Marquer la quête d'assemblage comme complétée
+                    for quest in game.quests:
+                        if quest.title == "Assembler le dispositif d'ultrasons":
+                            quest.current_step = 1
+                    
+                    return True
+                else:
+                    manquants = [mat for mat in materiaux_requis if mat not in inventaire_lower]
+                    print(f"\n⚠️  Il vous manque les matériaux suivants:")
+                    for mat in manquants:
+                        print(f"  • {mat}")
+                    print()
+                    return False
+        
+        # Utilisation basique des objets
+        print(f"\nVous avez utilisé '{item_name}'.\n")
+        return True      
 
     @staticmethod
     def quests(game, list_of_words, number_of_parameters):
@@ -423,29 +611,6 @@ class Actions:
 
         Returns:
             bool: True if the command was executed successfully, False otherwise.
-
-
-        Examples:
-
-
-        >>> from game import Game
-        >>> game = Game()
-        >>> game.setup("TestPlayer")
-        >>> Actions.quests(game, ["quests"], 0)
-        <BLANKLINE>
-        📋 Liste des quêtes:
-          ❓ Grand Explorateur (Non activée)
-          ❓ Grand Voyageur (Non activée)
-          ❓ Découvreur de Secrets (Non activée)
-        <BLANKLINE>
-        True
-        >>> Actions.quests(game, ["quests", "param"], 0)
-        <BLANKLINE>
-        La commande 'quests' ne prend pas de paramètre.
-        <BLANKLINE>
-        False
-
-
         """
         # If the number of parameters is incorrect, print an error message and return False.
         n = len(list_of_words)
@@ -455,101 +620,55 @@ class Actions:
             return False
 
         # Show all quests
-        game.player.quest_manager.show_quests()
+        if game.quests:
+            print("\nListe des quêtes:")
+            print("=" * 50)
+            
+            # Display main quests
+            main_quests = [q for q in game.quests if q.is_main_quest]
+            if main_quests:
+                print("\n★ QUÊTES PRINCIPALES ★")
+                for quest in main_quests:
+                    if quest.is_complete():
+                        status = "✓ Complétée"
+                    elif quest.current_step > 0:
+                        status = "➤ En cours"
+                    else:
+                        status = "○ Non démarrée"
+                    print(f"  {quest.title} [{status}]")
+                    print(f"    {quest.description}")
+            
+            # Display secondary quests
+            secondary_quests = [q for q in game.quests if not q.is_main_quest]
+            if secondary_quests:
+                print("\n◆ QUÊTES SECONDAIRES ◆")
+                for i, quest in enumerate(secondary_quests, 1):
+                    if quest.is_complete():
+                        status = "✓ Complétée"
+                    elif quest.current_step > 0:
+                        status = "➤ En cours"
+                    else:
+                        status = "○ Non démarrée"
+                    print(f"  {i}. {quest.title} [{status}]")
+                    print(f"     {quest.description}")
+            
+            print("\n" + "=" * 50)
+        else:
+            print("\nAucune quête disponible.\n")
         return True
 
 
     @staticmethod
     def quest(game, list_of_words, number_of_parameters):
         """
-        Show details about a specific quest.
+        Show details about a specific quest and its current step.
        
         Args:
             game (Game): The game object.
             list_of_words (list): The list of words in the command.
             number_of_parameters (int): The number of parameters expected by the command.
         Returns:
-            bool: True if the command was executed successfully, False otherwise.
-
-        Examples:
-
-        >>> from game import Game
-        >>> game = Game()
-        >>> game.setup("TestPlayer")
-        >>> Actions.quest(game, ["quest", "Grand", "Voyageur"], 1)
-        <BLANKLINE>
-        📋 Quête: Grand Voyageur
-        📖 Déplacez-vous 10 fois entre les lieux.
-        <BLANKLINE>
-        Objectifs:
-          ⬜ Se déplacer 10 fois (Progression: 0/10)
-        <BLANKLINE>
-        🎁 Récompense: Bottes de voyageur
-        <BLANKLINE>
-        True
-        >>> Actions.quest(game, ["quest"], 1)
-        <BLANKLINE>
-        La commande 'quest' prend 1 seul paramètre.
-        <BLANKLINE>
-        False
-
-        """
-
-        # If the number of parameters is incorrect, print an error message and return False.
-        
-        n = len(list_of_words)
-        if n < number_of_parameters + 1:
-            command_word = list_of_words[0]
-            print(MSG1.format(command_word=command_word))
-            return False
-
-
-        # Get the quest title from the list of words (join all words after command)
-        quest_title = " ".join(list_of_words[1:])
-
-
-        # Prepare current counter values to show progress
-        current_counts = {
-            "Se déplacer": game.player.move_count
-        }
-
-        # Show quest details
-        game.player.quest_manager.show_quest_details(quest_title, current_counts)
-        
-        return True
-
-    
-    @staticmethod
-    def activate(game, list_of_words, number_of_parameters):
-        """
-        Activate a specific quest.
-       
-        Args:
-            game (Game): The game object.
-            list_of_words (list): The list of words in the command.
-            number_of_parameters (int): The number of parameters expected by the command.
-
-        Returns:
-            bool: True if the command was executed successfully, False otherwise.
-
-        Examples:
-
-        >>> from game import Game
-        >>> game = Game()
-        >>> game.setup("TestPlayer")
-        >>> Actions.activate(game, ["activate", "Grand", "Voyageur"], 1) # doctest: +ELLIPSIS
-        <BLANKLINE>
-        🗡️  Nouvelle quête activée: Grand Voyageur
-        📝 Déplacez-vous 10 fois entre les lieux.
-        <BLANKLINE>
-        True
-        >>> Actions.activate(game, ["activate"], 1)
-        <BLANKLINE>
-        La commande 'activate' prend 1 seul paramètre.
-        <BLANKLINE>
-        False
-
-        """
+            bool: True if the command was executed successfully, False otherwise """
 
         # If the number of parameters is incorrect, print an error message and return False.
         n = len(list_of_words)
@@ -558,64 +677,103 @@ class Actions:
             print(MSG1.format(command_word=command_word))
             return False
 
-
         # Get the quest title from the list of words (join all words after command)
         quest_title = " ".join(list_of_words[1:])
 
-
-        # Try to activate the quest
-        if game.player.quest_manager.activate_quest(quest_title):
-            return True
-
-
-        msg1 = f"\nImpossible d'activer la quête '{quest_title}'. "
-        msg2 = "Vérifiez le nom ou si elle n'est pas déjà active.\n"
-        print(msg1 + msg2)
-        # print(f"\nImpossible d'activer la quête '{quest_title}'. \
-        # Vérifiez le nom ou si elle n'est pas déjà active.\n")
+        # Find and show quest details
+        for quest in game.quests:
+            if quest.title.lower() == quest_title.lower():
+                print(f"\n=== Quête: {quest.title} ===")
+                print(f"Description: {quest.description}")
+                print(f"Progression: {quest.current_step + 1}/{len(quest.steps)}")
+                
+                current_step = quest.get_current_step()
+                if current_step:
+                    print(f"\nÉtape actuelle: {current_step.description}")
+                else:
+                    print("\nQuête complétée!")
+                return True
+        
+        print(f"\nQuête '{quest_title}' non trouvée.\n")
         return False
 
+    @staticmethod
+    def handle_special_responses(current_step):
+        """
+        Gérer les réponses spéciales pour une étape de quête donnée.
+        Args:
+            current_step (QuestStep): L'étape de quête actuelle.
+        """
+        response = current_step.get_current_response()
+        if response:
+            print(response)
 
     @staticmethod
-    def rewards(game, list_of_words, number_of_parameters):
+    def handle_choices(current_step, quest):
         """
-        Display all rewards earned by the player.
-       
+        Gérer les choix pour une étape de quête donnée.
         Args:
-            game (Game): The game object.
-            list_of_words (list): The list of words in the command.
-            number_of_parameters (int): The number of parameters expected by the command.
-
+            current_step (QuestStep): L'étape de quête actuelle.
+            quest (Quest): La quête actuelle.
         Returns:
-            bool: True if the command was executed successfully, False otherwise.
-
-        Examples:
-
-        >>> from game import Game
-        >>> game = Game()
-        >>> game.setup("TestPlayer")
-        >>> Actions.rewards(game, ["rewards"], 0)
-        <BLANKLINE>
-        🎁 Aucune récompense obtenue pour le moment.
-        <BLANKLINE>
-        True
-        >>> Actions.rewards(game, ["rewards", "param"], 0)
-        <BLANKLINE>
-        La commande 'rewards' ne prend pas de paramètre.
-        <BLANKLINE>
-        False
+            bool: True si le joueur a fait un choix valide, False sinon.
         """
+        choices = current_step.get_current_choices()
+        if choices:
+            for i, choice in enumerate(choices, 1):
+                print(f"{i}. {choice}")
+            user_choice = input("Choisissez une option: ")
+            try:
+                user_choice = int(user_choice)
+                if 1 <= user_choice <= len(choices):
+                    chosen_option = choices[user_choice - 1]
+                    print(f"Vous avez choisi: {chosen_option}")
+                    correct_choices = current_step.get_current_correct_choices()
+                    if chosen_option in correct_choices:
+                        if current_step.advance_substep():
+                            return True
+                        Actions.handle_special_responses(current_step)
+                        return Actions.handle_choices(current_step, quest)
+                    print("Choix incorrect. Vous devez recommencer l'étape.")
+                    current_step.reset_substep()  # Réinitialisation de la sous-étape
+                    return False
+                print("Choix invalide.")
+                return False
+            except ValueError:
+                print("Choix invalide.")
+                return False
+        return False
 
-        # If the number of parameters is incorrect, print an error message and return False.
-        
-        n = len(list_of_words)
-        if n != number_of_parameters + 1:
-            command_word = list_of_words[0]
-            print(MSG0.format(command_word=command_word))
-            return False
-
-
-        # Show all rewards
-        game.player.show_rewards()
-        return True
+    @staticmethod
+    def advance_quest(game, quest):
+        """
+        Faire avancer la quête actuelle.
+        Args:
+            game (Game): L'objet du jeu.
+            quest (Quest): La quête actuelle.
+        """
+        current_step = quest.get_current_step()
+        if current_step.advance_substep():
+            quest.advance()
+            if current_step.reward:
+                game.player.inventory[current_step.reward.name] = current_step.reward
+                print(f"Vous avez reçu {current_step.reward.name} comme récompense.")
+            if quest.is_complete() and not quest.title == "La quête principale":
+                print(f"Félicitations, vous avez complété la quête: {quest.title}")
+            else:
+                next_step = quest.get_current_step()
+                if next_step:
+                    next_step.current_substep = 0
+                    print(f"Étape suivante: {next_step.description}")
+                    if game.player.current_room == next_step.character.current_room:
+                        Actions.handle_special_responses(next_step)
+                        Actions.handle_choices(next_step, quest)
+                    else:
+                        l = "Vous devez aller dans la salle "
+                        v = " pour continuer la quête."
+                        print(l + next_step.character.current_room.name + v)
+        else:
+            Actions.handle_special_responses(current_step)
+            if not Actions.handle_choices(current_step, quest):
+                print("Vous avez échoué cette étape de la quête. Veuillez réessayer.")
 

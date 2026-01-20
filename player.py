@@ -1,7 +1,5 @@
 # Define the Player class.
 
-from quest import QuestManager
-
 class Player():
     """
         This class represents a player. A player is composed of a name and a current room.
@@ -19,9 +17,8 @@ class Player():
         self.current_room = None
         self.history = []
         self.inventory = {}
-        self.max_weight = 8.0  
+        self.max_weight = 8000.0  # en grammes
         self.move_count = 0
-        self.quest_manager = QuestManager(self)
         self.rewards = []  # List to store earned rewards
 
             
@@ -40,14 +37,8 @@ class Player():
         self.current_room = next_room
         print(self.current_room.get_long_description())
         
-        
-        # Check room visit objectives
-        self.quest_manager.check_room_objectives(self.current_room.name)
-
-
-        # Increment move counter and check movement objectives
+        # Increment move counter
         self.move_count += 1
-        self.quest_manager.check_counter_objectives("Se déplacer", self.move_count)
         
         return True
 
@@ -138,3 +129,15 @@ class Player():
         for item in self.inventory.values():
             total += item.weight
         return total
+
+    def check_inventory_space(self, item_weight):
+        """
+        Check if the player has space in inventory for an item.
+        
+        Args:
+            item_weight (float): The weight of the item to check.
+            
+        Returns:
+            bool: True if there is space, False otherwise.
+        """
+        return self.get_weight() + item_weight <= self.max_weight
