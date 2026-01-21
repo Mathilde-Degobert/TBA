@@ -11,6 +11,7 @@ from item import Item
 from character import Character
 from quest import Quest, QuestStep
 
+
 class Game:
     """ This class represents the game. """
 
@@ -48,7 +49,7 @@ class Game:
         self.commands["check"] = check
         talk = Command("talk", " <character> : parler à un personnage", Actions.talk, 1)
         self.commands["talk"] = talk
-        use = Command("use", " <item> : utiliser un objet de l'inventaire", Actions.use, 1) 
+        use = Command("use", " <item> : utiliser un outil de l'inventaire", Actions.use, 1) 
         self.commands["use"] = use
         quests = Command("quests", " : afficher la liste de toutes les quêtes", Actions.quests, 0)
         self.commands["quests"] = quests
@@ -105,7 +106,8 @@ class Game:
         Sous_sol.exits = {"N" : None , "E" : None, "S" : None, "O" : None, 
         "U": Maison_rez_de_chaussée, "D": None}
       
-        # Setup items - MATÉRIAUX trouvables sur la map
+        # Setup items
+        # Items : MATÉRIAUX trouvables sur la map
         Modulateur = Item("modulateur", "Module d'amplification (matériau)", 12)
         forest.items[Modulateur.name] = Modulateur
 
@@ -121,23 +123,26 @@ class Game:
         Câbles = Item("câbles", "Des câbles électriques (matériau)", 5)
         Voiture.items[Câbles.name] = Câbles
 
-        # Setup items - OBJETS SPÉCIAUX
         Clés_sous_sol = Item("clés", "les clés menant au sous-sol", 1)
         Voiture.items[Clés_sous_sol.name] = Clés_sous_sol
         
-        Clés_Etage = Item("clés-étage", "les clés menant à l'étage", 1)
-        
-        # Table de bricolage (pour l'assemblage du dispositif)
-        Table_bricolage = Item("table", "une table de bricolage avec tous les outils nécessaires", 1000)
+        # Table de bricolage (pour l'assemblage du dispositif final)
+        Table_bricolage = Item("table", "une table de bricolage avec tous les outils nécessaires", 50000)
         Sous_sol.items[Table_bricolage.name] = Table_bricolage
 
-        # Dispositif d'ultrasons (créé par crafting)
-        Dispositif_ultrasons = Item("dispositif", "un dispositif à ultrasons (créé)", 8.0)
-        
-        # Items pour les récompenses de dialogue
+        # Récompenses de quêtes :
+            # MATERIAUX
         Microphone = Item("microphone", "Microphone de babyphone (matériau)", 15)
-        AppareilAuditif = Item("appareil-auditif", "Appareil auditif ancien (matériau)", 8)
-        
+        Appareil_Auditif = Item("appareil-auditif", "Appareil auditif ancien (matériau)", 8)
+            # OUTILS
+        Marteau = Item("marteau", "Un marteau robuste (outil)", 2.5)
+        Tournevis = Item("tournevis", "Un tournevis multifonction (outil)", 1.5)
+        Cle_a_molette = Item("clé-molette", "Une clé à molette (outil)", 3.0)
+        Clé_Etage = Item("clé-étage", "la clé menant à l'étage (outil)", 1)
+        Dispositif_ultrasons = Item("dispositif", "un dispositif à ultrasons (créé)", 8.0)
+        pied_de_biche = Item("pied-de-biche", "Un pied-de-biche solide (outil)", 4.0)
+        Sous_sol.items[pied_de_biche.name] = pied_de_biche
+
         # Setup Characters
         Beau_Abbot = Character("Beau Abbot", "Le cadet de la famille Abbot, agé d'a peine 4 ans. Il vous regarde de ses petits yeux innocents.", 
         Maison_rez_de_chaussée,
@@ -155,6 +160,11 @@ class Game:
         self.character.append(Lee_Abbot)
         Sous_sol.characters[Lee_Abbot.name] = Lee_Abbot
 
+        Regan_Abbot = Character("Regan Abbot", "la fille aînée de la famille Abbot, agée de 16 ans. Elle vous observe avec méfiance.", Maison_étage, 
+        ["Bonjour", "Je m'appelle Regan"], can_move=True)
+        self.character.append(Regan_Abbot)
+        Maison_étage.characters[Regan_Abbot.name] = Regan_Abbot
+
         Evelyn_Abbot = Character("Evelyn Abbot", "la mère de la famille. Enceinte et très protectrice de ses enfants", Maison_étage, 
         ["Bonjour", "Je m'appelle Evelyn"], can_move=True)
         self.character.append(Evelyn_Abbot)
@@ -168,203 +178,34 @@ class Game:
         self.player = Player(input("\nEntrez votre nom: "))
         self.player.current_room = Sous_sol
 
-        #setup quests
-        # Quête Principale: Assembler le dispositif d'ultrasons
-        Quest_step_assembler = [
+        # Setup conditions
+        self.conditions = Conditions(self)
+
+        # Setup quests
+        quest_steps = [
             QuestStep(
-                "Assemblez le dispositif d'ultrasons au sous-sol sur la table de bricolage.",
-                character=None,
-                quest_responses=["Vous avez assemblé le dispositif d'ultrasons avec succès !"],
-                reward_item=Dispositif_ultrasons
+                "Parlez a Regan Abbot au rez-de-chaussée de la maison",
+                character=Regan_Abbot,
+                special_responses=[
+                    ("Regan : ..."
+                     " ..."),
+                    "Regan emet quelques mouvement de bouche inaudibles, vous comprenez aux mouvements de ses mains qu'elle est sourde et muette.",
+                    "Regan semble vouloir vous dire quelque chose, mais vous ne comprenez pas."
+                ],
+                choices=[  
+                    ["Passer votre chemin", "Essayer de communiquer avec elle"],
+                    ["Tu vas bien ?", "Que fais tu ici ?", "Ou est ta famille ?", "Peux tu m'aider ?"]
+                ],
+                correct_choices=[["Essayer de communiquer avec elle"],
+                                ["Tu vas bien ?"]],
+                reward_item= Appareil_Auditif
             ),
-        ]
-        Quete_assembler = Quest("Assembler le dispositif d'ultrasons",
-                               "Collectez tous les matériaux et utilisez les outils sur la table de bricolage au sous-sol.",
-                               Quest_step_assembler,
-                               is_main_quest=True)
-        self.quests.append(Quete_assembler)
-        
-        # Items pour les outils (récompenses de quête)
-        Marteau = Item("marteau", "Un marteau robuste (outil)", 2.5)
-        Tournevis = Item("tournevis", "Un tournevis multifonction (outil)", 1.5)
-        Cle_a_molette = Item("clé-molette", "Une clé à molette (outil)", 3.0)
-        
-        # Quête 1: Aider Lee Abbott (dialogue avec choix multiples)
-        Quest_step_lee_1 = QuestStep(
-            "Lee Abbott est occupé à installer de l'isolant sur les murs du sous-sol. Il vous aperçoit et vous demande : 'Qu'est-ce que tu veux ?'",
-            character="Lee Abbot",
-            quest_responses=["Lee Abbott vous regarde en attendant votre réponse."],
-            choices=[
-                ["Puis-je vous aider ?", "Pouvez-vous me prêter un outil ?", "Je n'ai besoin de rien."]
-            ],
-            correct_choices=[
-                ["Puis-je vous aider ?", "Pouvez-vous me prêter un outil ?"]
-            ],
-        )
-        
-        Quest_step_lee_2_help = QuestStep(
-            "Lee Abbott sourit avec soulagement et vous dit : 'C'est gentil ! Tu peux m'aider à tenir les panneaux ? Avec toi, ce sera beaucoup plus facile.'",
-            character="Lee Abbot",
-            quest_responses=["Vous avez aidé Lee Abbott à installer l'isolant. Après plusieurs heures, le travail est enfin terminé. Il vous remercie chaleureusement et vous dit : 'Installe-toi à l'étage si tu veux. La pièce n'est pas utilisée par la famille. Tu y trouveras refuge.'"],
-            choices=[],
-            correct_choices=[],
-            reward_item=Clés_Etage
-        )
-        
-        # Créer une quête unique pour Lee Abbott
-        Quete_lee = Quest("Interagir avec Lee Abbott",
-                         "Lee Abbott demande de l'aide pour installer l'isolant.",
-                         [Quest_step_lee_1, Quest_step_lee_2_help],
-                         is_main_quest=False)
-        
-        self.quests.append(Quete_lee)
-        
-        # Quête 2: Trouver le modulateur dans la forêt
-        Quest_step_modulateur = [
-            QuestStep(
-                "Vous êtes dans la forêt. Vous apercevez un vieux modulateur d'amplification caché sous des feuilles. Qu'allez-vous faire ?",
-                character="La femme dans la forêt",
-                quest_responses=["Vous avez trouvé le modulateur d'amplification !"],
-                choices=[
-                    ["Prendre le modulateur", "Demander à la femme", "Repartir"],
-                ],
-                correct_choices=[
-                    ["Prendre le modulateur"]
-                ],
-                reward_item=Modulateur
-            ),
-        ]
-        Quete_modulateur = Quest("Chercher le modulateur",
-                                "Trouvez le modulateur d'amplification dans la forêt.",
-                                Quest_step_modulateur,
-                                is_main_quest=False)
-        self.quests.append(Quete_modulateur)
-        
-        # Quête 3: Obtenir la batterie
-        Quest_step_batterie = [
-            QuestStep(
-                "Sur le pont, vous trouvez une batterie. Elle semble encore en bon état. Voulez-vous la prendre ?",
-                character=None,
-                quest_responses=["Vous avez récupéré la batterie."],
-                choices=[
-                    ["Oui, prendre la batterie", "Non, ce n'est pas sûr", "Vérifier d'abord"]
-                ],
-                correct_choices=[
-                    ["Oui, prendre la batterie", "Vérifier d'abord"]
-                ],
-                reward_item=Batterie
-            ),
-        ]
-        Quete_batterie = Quest("Récupérer la batterie",
-                              "Trouvez la batterie sur le pont.",
-                              Quest_step_batterie,
-                              is_main_quest=False)
-        self.quests.append(Quete_batterie)
-        
-        # Quête 4: Obtenir les piles
-        Quest_step_piles = [
-            QuestStep(
-                "Au magasin, vous trouvez des piles. Elles se trouvent sur une étagère fragile. Soyez prudent.",
-                character=None,
-                quest_responses=["Vous avez récupéré les piles sans faire de dégâts."],
-                choices=[
-                    ["Prendre les piles doucement", "Les arracher brutalement", "Appeler quelqu'un"]
-                ],
-                correct_choices=[
-                    ["Prendre les piles doucement"]
-                ],
-                reward_item=Piles
-            ),
-        ]
-        Quete_piles = Quest("Trouver les piles",
-                           "Trouvez les piles au magasin.",
-                           Quest_step_piles,
-                           is_main_quest=False)
-        self.quests.append(Quete_piles)
-        
-        # Quête 5: Obtenir les câbles dans la voiture
-        Quest_step_cables = [
-            QuestStep(
-                "Dans la voiture, vous découvrez des câbles électriques. Ils semblent connectés à quelque chose.",
-                character=None,
-                quest_responses=["Vous avez extrait les câbles avec précaution."],
-                choices=[
-                    ["Débrancher et prendre", "Couper les câbles", "Étudier d'abord"],
-                ],
-                correct_choices=[
-                    ["Débrancher et prendre"]
-                ],
-                reward_item=Câbles
-            ),
-        ]
-        Quete_cables = Quest("Extraire les câbles",
-                            "Trouvez les câbles électriques dans la voiture.",
-                            Quest_step_cables,
-                            is_main_quest=False)
-        self.quests.append(Quete_cables)
-        
-        # Quête 6: Obtenir le microphone
-        Quest_step_microphone = [
-            QuestStep(
-                "Vous parlez à Marcus Abbot. Il semble avoir un microphone ancien.",
-                character="Marcus Abbot",
-                quest_responses=["Marcus vous donne le microphone."],
-                choices=[
-                    ["Le demander poliment", "Lui l'enlever de force", "Lui proposer un échange"],
-                ],
-                correct_choices=[
-                    ["Le demander poliment", "Lui proposer un échange"]
-                ],
-                reward_item=Microphone
-            ),
-        ]
-        Quete_microphone = Quest("Récupérer le microphone",
-                                "Parlez à Marcus Abbot pour obtenir le microphone.",
-                                Quest_step_microphone,
-                                is_main_quest=False)
-        self.quests.append(Quete_microphone)
-        
-        # Quête 7: Obtenir l'appareil auditif
-        Quest_step_auditif = [
-            QuestStep(
-                "Vous trouvez Evelyn Abbot. Elle possède un vieil appareil auditif.",
-                character="Evelyn Abbot",
-                quest_responses=["Evelyn vous donne l'appareil auditif."],
-                choices=[
-                    ["Expliquer vos intentions", "Prétendre avoir besoin", "Rester muet"],
-                ],
-                correct_choices=[
-                    ["Expliquer vos intentions"]
-                ],
-                reward_item=AppareilAuditif
-            ),
-        ]
-        Quete_auditif = Quest("Localiser l'appareil auditif",
-                             "Parlez à Evelyn Abbot pour obtenir l'appareil auditif.",
-                             Quest_step_auditif,
-                             is_main_quest=False)
-        self.quests.append(Quete_auditif)
-        
-        # Quête 8: Obtenir la carte mère
-        Quest_step_cartmere = [
-            QuestStep(
-                "Vous trouvez une carte mère dans les champs. Elle est poussiéreuse mais semble intacte.",
-                character=None,
-                quest_responses=["Vous avez récupéré la carte mère."],
-                choices=[
-                    ["La nettoyer puis la prendre", "La prendre directement", "La laisser ici"],
-                ],
-                correct_choices=[
-                    ["La nettoyer puis la prendre"]
-                ],
-                reward_item=CarteMere
-            ),
-        ]
-        Quete_cartmere = Quest("Trouver la carte mère",
-                              "Trouvez la carte mère dans les champs.",
-                              Quest_step_cartmere,
-                              is_main_quest=False)
-        self.quests.append(Quete_cartmere)
+            ]
+        main_quest = Quest("La quête principale",
+                           "Obtenez des items pour avancer dans l'histoire.",
+                           quest_steps)
+        self.quests.append(main_quest)
+
 
     def play(self):
         """Play the game."""

@@ -30,22 +30,8 @@ class Actions:
 
         Returns:
             bool: True if the command was executed successfully, False otherwise.
-
-        Examples:
-        
-        >>> from game import Game
-        >>> game = Game()
-        >>> game.setup()
-        >>> go(game, ["go", "N"], 1)
-        True
-        >>> go(game, ["go", "N", "E"], 1)
-        False
-        >>> go(game, ["go"], 1)
-        False
-
         """
 
-    
         player = game.player
         l = len(list_of_words)
         # If the number of parameters is incorrect, print an error message and return False.
@@ -54,6 +40,16 @@ class Actions:
             print(MSG1.format(command_word=command_word))
             return False
             
+            """
+            Handle quests in the game.
+            Args:
+                game (Game): The game object.
+                list_of_words (list): The list of words in the command.
+                number_of_parameters (int): The number of parameters expected by the command.
+            Returns:
+                bool: True if the command was executed successfully, False otherwise.
+            """
+            ...
         directions = {"NORD": "N" , "N":"N" , "SUD":"S" , "S": "S" , "OUEST":"O" , "O":"O",
                        "EST":"E" , "E":"E" , "UP": "U" , "U":"U" , "DOWN":"D" , "D":"D"}
 
@@ -78,19 +74,6 @@ class Actions:
 
         Returns:
             bool: True if the command was executed successfully, False otherwise.
-
-        Examples:
-
-        >>> from game import Game
-        >>> game = Game()
-        >>> game.setup()
-        >>> quit(game, ["quit"], 0)
-        True
-        >>> quit(game, ["quit", "N"], 0)
-        False
-        >>> quit(game, ["quit", "N", "E"], 0)
-        False
-
         """
         l = len(list_of_words)
         # If the number of parameters is incorrect, print an error message and return False.
@@ -117,19 +100,6 @@ class Actions:
 
         Returns:
             bool: True if the command was executed successfully, False otherwise.
-
-        Examples:
-
-        >>> from game import Game
-        >>> game = Game()
-        >>> game.setup()
-        >>> help(game, ["help"], 0)
-        True
-        >>> help(game, ["help", "N"], 0)
-        False
-        >>> help(game, ["help", "N", "E"], 0)
-        False
-
         """
 
         # If the number of parameters is incorrect, print an error message and return False.
@@ -375,12 +345,145 @@ class Actions:
                 # Check if character is in the same room as the player
                 if character.current_room is player.current_room:
                     character_found = character
-                    break
-        
+                    break      
         if character_found is None:
             print(f"\n'{character_name}' n'est pas dans la pièce.\n")
             return False
-        
+#####
+
+    @staticmethod
+    def use(game, list_of_words: list, number_of_parameters: int) -> bool:
+        """
+        Utilise l'outil et accorde la récompense de quête si applicable.
+        Vérifie toutes les conditions d'utilisation, affiche les messages d'erreur, et gère l'ajout de la récompense à l'inventaire ou à la pièce.
+        Args:
+            game (Game): L'instance du jeu.
+            list_of_words (list): Commande utilisateur.
+            number_of_parameters (int): Nombre de paramètres attendus.
+        Returns:
+            bool: True si l'outil a été utilisé avec succès, False sinon
+        """
+        player = game.player
+        current_room = player.current_room
+        inventaire_lower = {k.lower(): v for k, v in player.inventory.items()}
+
+        if len(list_of_words) != number_of_parameters + 1:
+            command_word = list_of_words[0]
+            print(MSG1.format(command_word=command_word))
+            return False
+
+        item_name = list_of_words[1].lower()
+
+        # Vérifie la présence de l'item dans l'inventaire
+        if item_name not in player.inventory:
+            print(f"\nL'objet '{item_name}' n'est pas dans votre inventaire.\n")
+            return False
+
+        # Prépare les conditions dynamiques
+        localisation = player.current_room.name.lower()
+        objets_piece = list(current_room.items.keys())
+        inventaire_items = list(inventaire_lower.keys())
+
+        # Vérifie les conditions d'utilisation
+        success, quest_reward = Actions.check_condition_outils(game, item_name, localisation, objets_piece, inventaire_items)
+        if not success:
+            print(f"\n{item_name} ne vous est pas utile.\n")
+            return False
+
+        print(f"\nVous avez utilisé {item_name} avec succès.\n")
+
+        # Ajoute la récompense à l'inventaire ou à la pièce
+        if quest_reward:
+            if player.check_inventory_space(quest_reward.weight):
+                player.inventory[quest_reward.name] = quest_reward
+                print(f"Vous avez obtenu : {quest_reward.name}\n")
+                del player.inventory[item_name]
+                # Si c'est le dispositif d'ultrasons, retire les matériaux utilisés
+                if quest_reward.name == "dispositif d'ultrasons":
+                    materiaux_requis = ["modulateur", "batterie", "piles", "câbles", "microphone", "appareil-auditif", "carte-mère"]
+                    for mat in materiaux_requis:
+                        if mat in player.inventory:
+                            del player.inventory[mat]
+            else:
+                current_room.items[quest_reward.name] = quest_reward
+                print(f"\nVotre inventaire est trop plein pour {quest_reward.name}. L'objet a été déposé dans la pièce.\n")
+                return False
+        return True
+
+    @staticmethod
+    def check_condition_outils(game, outil: str, localisation: str, objets_piece: list, inventaire: list):
+        """
+        Vérifie si toutes les conditions d'utilisation de l'outil sont remplies.
+        Affiche des messages d'erreur précis si une condition n'est pas satisfaite.
+        Retourne un tuple (bool, Item): (True/False si utilisable, récompense ou None).
+        """
+        # Clé à l'étage
+        if outil == "clé-étage":
+            if localisation == "etage":
+                from item import Item
+                quest_reward = Item("Microphone", "Microphone trouvé à l'étage", 1.0)
+                print("\nVous avez réussi à ouvrir la porte de l'étage et trouvez un microphone par terre !\n")
+                return True, quest_reward
+            print("\nVous devez être à l'étage pour utiliser la clé.\n")
+            return False, None
+        # Pied-de-biche dans la voiture
+        if outil == "pied-de-biche":
+            if localisation == "voiture":
+                from item import Item
+                quest_reward = Item("câbles", "Câbles récupérés du tableau de bord", 1.0)
+                print("\nVous avez réussi à ouvrir le tableau de bord et récupérer les câbles !\n")
+                return True, quest_reward
+            print("\nVous devez être dans la voiture pour utiliser le pied-de-biche.\n")
+            return False, None
+        # Tournevis au sous-sol avec table et matériaux
+        if outil == "tournevis":
+            if localisation == "sous_sol":
+                if "table" in [x.lower() for x in objets_piece]:
+                    materiaux_requis = ["modulateur", "batterie", "piles", "câbles", "microphone", "appareil-auditif", "carte-mère"]
+                    manquants = [mat for mat in materiaux_requis if mat not in inventaire]
+                    if not manquants:
+                        from item import Item
+                        quest_reward = Item("dispositif d'ultrasons", "Dispositif d'ultrasons assemblé", 1.0)
+                        print("\nVous avez fabriqué le dispositif d'ultrasons avec succès !\n")
+                        return True, quest_reward
+                    print("\nIl vous manque les matériaux suivants :")
+                    for mat in manquants:
+                        print(f" - {mat}")
+                    return False, None
+                print("\nVous devez avoir une table dans la pièce pour utiliser le tournevis au sous-sol.\n")
+                return False, None
+            print("\nVous devez être au sous-sol pour utiliser le tournevis.\n")
+            return False, None
+        return False, None
+
+
+    @staticmethod
+    def check_quest_talk(game, character):
+        """
+        Vérifier si le personnage avec lequel le joueur parle est lié à une quête en cours.
+        Args:
+            game (Game): L'objet du jeu.
+            character (Character): Le personnage avec lequel le joueur parle.
+        Returns:
+            bool: True si la quête a avancé, False sinon.
+        """
+        if character is None:
+            return False
+        for quest in game.quests:
+            current_step = quest.get_current_step()
+            if current_step and current_step.character == character:
+                if game.player.current_room == character.current_room:
+                    Actions.handle_special_responses(current_step)
+                    if Actions.handle_choices(current_step, quest):
+                        Actions.advance_quest(game, quest)
+                    return True
+                l="Vous devez être dans la salle "
+                v = " pour parler à "
+                print(l + character.current_room.name + v + character.name)
+                return False
+        return False
+
+
         # Cas spécial pour Lee Abbott: vérifier si la quête continue
         if character_found.name == "Lee Abbot":
             lee_quest = None
@@ -390,7 +493,7 @@ class Actions:
                     break
             
             # Vérifier si le joueur a déjà les clés ET le tournevis
-            has_keys = "clés-étage" in player.inventory
+            has_keys = "clé-étage" in player.inventory
             has_screwdriver = "tournevis" in player.inventory
             
             # Si quête complétée ET a tous les items, terminer
@@ -409,25 +512,28 @@ class Actions:
                     if response:
                         print(response)
                     
-                    # Afficher les choix non encore effectués
+                    # Afficher les choix non encore effectués avec leurs numéros originaux
                     if current_step.get_current_choices():
-                        choices = current_step.get_current_choices()[0]
-                        # Filtrer les choix selon ce qui a déjà été fait
-                        available_choices = []
-                        for choice in choices:
-                            if choice not in lee_quest.completed_paths:
-                                available_choices.append(choice)
+                        choices = current_step.get_current_choices()
                         
-                        if available_choices:
-                            print("\nChoix disponibles:")
-                            for i, choice in enumerate(available_choices, 1):
-                                print(f"{i}. {choice}")
-                            
+                        print("\nChoix disponibles:")
+                        choice_mapping = {}  # Mapper les numéros affichés aux choix
+                        displayed_num = 1
+                        
+                        for original_idx, choice in enumerate(choices):
+                            # Masquer le choix "Pouvez-vous me prêter un outil ?" si le tournevis n'a pas été obtenu
+                            if choice == "Pouvez-vous me prêter un outil ?" and "tournevis" not in player.inventory:
+                                continue
+                            if choice not in lee_quest.completed_paths:
+                                print(f"{original_idx + 1}. {choice}")
+                                choice_mapping[original_idx + 1] = choice
+                        
+                        if choice_mapping:
                             user_input = input("Votre choix: ")
                             try:
-                                choice_idx = int(user_input) - 1
-                                if 0 <= choice_idx < len(available_choices):
-                                    chosen_option = available_choices[choice_idx]
+                                choice_num = int(user_input)
+                                if choice_num in choice_mapping:
+                                    chosen_option = choice_mapping[choice_num]
                                     print(f"\nVous avez choisi: {chosen_option}\n")
                                     
                                     # Marquer ce choix comme complété
@@ -438,18 +544,51 @@ class Actions:
                                     next_step = lee_quest.get_current_step()
                                     
                                     if next_step:
-                                        print(f"\n{next_step.description}\n")
-                                        response = next_step.get_current_response()
-                                        if response:
-                                            print(response)
-                                        
-                                        # Ajouter la récompense
-                                        if next_step.reward:
-                                            if player.check_inventory_space(next_step.reward.weight):
-                                                player.inventory[next_step.reward.name] = next_step.reward
-                                                print(f"\nVous avez obtenu: {next_step.reward.name}\n")
-                                            else:
-                                                print(f"\n⚠️ Votre inventaire est trop plein pour {next_step.reward.name}.\n")
+                                        # Adapter le message en fonction du choix
+                                        if chosen_option == "Puis-je vous aider ?":
+                                            print(f"\n{next_step.description}\n")
+                                            response = next_step.get_current_response()
+                                            if response:
+                                                print(response)
+                                            # Ajouter la récompense
+                                            if next_step.reward:
+                                                if player.check_inventory_space(next_step.reward.weight):
+                                                    player.inventory[next_step.reward.name] = next_step.reward
+                                                    print(f"\nVous avez obtenu: {next_step.reward.name}\n")
+                                                else:
+                                                    print(f"\n⚠️ Votre inventaire est trop plein pour {next_step.reward.name}.\n")
+                                        elif chosen_option == "Pouvez-vous me prêter un outil ?":
+                                            print(f"\nLee Abbott réfléchit un moment et dit : 'Je pourrais te prêter un outil. Lequel te serait utile ?'\n")
+                                            print("Voici les outils disponibles:")
+                                            print("1. Marteau")
+                                            print("2. Tournevis")
+                                            print("3. Clé à molette\n")
+                                            
+                                            tool_input = input("Quel outil voulez-vous ? ")
+                                            try:
+                                                tool_choice = int(tool_input)
+                                                from item import Item
+                                                tools = {
+                                                    1: Item("marteau", "Un marteau robuste (outil)", 2.5),
+                                                    2: Item("tournevis", "Un tournevis multifonction (outil)", 1.5),
+                                                    3: Item("clé-molette", "Une clé à molette (outil)", 3.0)
+                                                }
+                                                tool_names = {1: "marteau", 2: "tournevis", 3: "clé-molette"}
+                                                
+                                                if tool_choice in tools:
+                                                    tool_item = tools[tool_choice]
+                                                    tool_name = tool_names[tool_choice]
+                                                    if player.check_inventory_space(tool_item.weight):
+                                                        player.inventory[tool_name] = tool_item
+                                                        print(f"\nLee Abbott vous donne le {tool_name}.\n")
+                                                        print(f"Vous avez obtenu: {tool_name}\n")
+                                                    else:
+                                                        print(f"\n Votre inventaire est trop plein pour le {tool_name}.\n")
+                                            except ValueError:
+                                                print("Choix invalide.")
+                                        else:
+                                            # Choix 3: "Je n'ai besoin de rien"
+                                            print(f"\nLee Abbott hausse les épaules et retourne à son travail.\n")
                                         
                                         # Réinitialiser la quête à l'étape 1 pour relancer le dialogue
                                         lee_quest.reset_to_step(0)
@@ -499,7 +638,7 @@ class Actions:
                                 player.inventory[next_step.reward.name] = next_step.reward
                                 print(f"\nVous avez obtenu: {next_step.reward.name}\n")
                             else:
-                                print(f"\n⚠️ Votre inventaire est trop plein pour {next_step.reward.name}.\n")
+                                print(f"\n Votre inventaire est trop plein pour {next_step.reward.name}.\n")
             else:
                 # Pas de choix, juste avancer l'étape
                 quest_for_character.advance()
@@ -514,91 +653,9 @@ class Actions:
         
         return True
 
-    @staticmethod
-    def use(game, list_of_words, number_of_parameters):
-        """
-        Uses an item from the player's inventory or crafts items.
+    
+    
 
-        Args:
-            game (Game): The game object.
-            list_of_words (list): The list of words in the command.
-            number_of_parameters (int): The number of parameters expected by the command.
-        Returns:
-            bool: True if the item was used successfully, False otherwise.
-        """
-        l = len(list_of_words)
-        if l != number_of_parameters + 1:
-            command_word = list_of_words[0]
-            print(MSG1.format(command_word=command_word))
-            return False
-        player = game.player
-        item_name = list_of_words[1].lower()
-
-        # Check if the item is in the player's inventory.
-        if item_name not in player.inventory:
-            print(f"\nL'objet '{item_name}' n'est pas dans votre inventaire.\n")
-            return False
-        
-        item = player.inventory[item_name]
-        
-        # Crafting: Assembler le dispositif d'ultrasons à la table de bricolage avec un outil
-        if "table" in player.current_room.items:
-            # Si on utilise un outil (marteau ou tournevis)
-            if item_name in ["marteau", "tournevis"]:
-                # Vérifier si tous les matériaux requis sont présents
-                materiaux_requis = ["modulateur", "batterie", "piles", "câbles", "microphone", "appareil-auditif", "carte-mère"]
-                inventaire_lower = {k.lower(): v for k, v in player.inventory.items()}
-                
-                materiaux_presents = [mat for mat in materiaux_requis if mat in inventaire_lower]
-                
-                if len(materiaux_presents) == len(materiaux_requis):
-                    print("\n" + "="*60)
-                    print("ASSEMBLAGE DU DISPOSITIF D'ULTRASONS EN COURS...")
-                    print("="*60)
-                    print("Vous utilisez les outils et matériaux:")
-                    print(f"  🔨 Outil utilisé: {item_name}")
-                    print("  📦 Matériaux assemblés:")
-                    print("    ✓ Modulateur d'amplification")
-                    print("    ✓ Batterie/Piles")
-                    print("    ✓ Câbles électriques")
-                    print("    ✓ Microphone")
-                    print("    ✓ Appareil auditif")
-                    print("    ✓ Carte mère")
-                    print("  🔧 Circuits finalisés")
-                    print("="*60)
-                    print("✨ DISPOSITIF D'ULTRASONS CRÉÉ AVEC SUCCÈS !\n")
-                    
-                    # Retirer les matériaux de l'inventaire
-                    for mat in materiaux_requis:
-                        for key in list(player.inventory.keys()):
-                            if key.lower() == mat:
-                                del player.inventory[key]
-                                break
-                    
-                    # Ajouter le dispositif d'ultrasons
-                    from item import Item
-                    dispositif = Item("dispositif", "un dispositif à ultrasons (créé)", 8.0)
-                    player.inventory["dispositif"] = dispositif
-                    
-                    # Marquer la quête d'assemblage comme complétée
-                    for quest in game.quests:
-                        if quest.title == "Assembler le dispositif d'ultrasons":
-                            quest.current_step = 1
-                    
-                    return True
-                else:
-                    manquants = [mat for mat in materiaux_requis if mat not in inventaire_lower]
-                    print(f"\n⚠️  Il vous manque les matériaux suivants:")
-                    for mat in manquants:
-                        print(f"  • {mat}")
-                    print()
-                    return False
-        
-        # Utilisation basique des objets
-        print(f"\nVous avez utilisé '{item_name}'.\n")
-        return True      
-
-    @staticmethod
     def quests(game, list_of_words, number_of_parameters):
         """
         Show all quests and their status.
