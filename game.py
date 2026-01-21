@@ -178,34 +178,34 @@ class Game:
         self.player = Player(input("\nEntrez votre nom: "))
         self.player.current_room = Sous_sol
 
-        # Setup conditions
-        self.conditions = Conditions(self)
-
         # Setup quests
-        quest_steps = [
-            QuestStep(
-                "Parlez a Regan Abbot au rez-de-chaussée de la maison",
-                character=Regan_Abbot,
-                special_responses=[
-                    ("Regan : ..."
-                     " ..."),
-                    "Regan emet quelques mouvement de bouche inaudibles, vous comprenez aux mouvements de ses mains qu'elle est sourde et muette.",
-                    "Regan semble vouloir vous dire quelque chose, mais vous ne comprenez pas."
-                ],
-                choices=[  
-                    ["Passer votre chemin", "Essayer de communiquer avec elle"],
-                    ["Tu vas bien ?", "Que fais tu ici ?", "Ou est ta famille ?", "Peux tu m'aider ?"]
-                ],
-                correct_choices=[["Essayer de communiquer avec elle"],
-                                ["Tu vas bien ?"]],
-                reward_item= Appareil_Auditif
-            ),
-            ]
-        main_quest = Quest("La quête principale",
-                           "Obtenez des items pour avancer dans l'histoire.",
-                           quest_steps)
-        self.quests.append(main_quest)
+        def _setup_quests(self):
+        """Initialize all quests."""
+        key_quest = Quest(
+            title="Obtenez la clé de l'étage",
+            description="Parlez au personnage de la famille Abbot vous en apprendra plus sur ce monde",
+            objectives=["Parler à Lee Abbot", "Aider le"],
+            reward="clé-étage"
+        )
 
+        cables_quest = Quest(
+            title="obtenez des câbles",
+            description="Fouillez la voiture abandonnée",
+            objectives=["Trouver le pied de biche","Entrer dans la voiture", "utiliser le pied de biche pour ouvrir le tableau de bord"],
+            reward="câbles"
+        )
+
+        microphone_quest = Quest(
+            title="Trouvez un microphone",
+            description="Parvenez à entrer à l'étage pour trouver un microphone",
+            objectives=["Obtenir la clé de l'étage", "Aller à l'étage"]
+            reward="microphone"
+        )
+
+        # Add quests to player's quest manager
+        self.player.quest_manager.add_quest(key_quest)
+        self.player.quest_manager.add_quest(cables_quest)
+        self.player.quest_manager.add_quest(microphone_quest)
 
     def play(self):
         """Play the game."""
