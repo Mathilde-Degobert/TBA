@@ -9,7 +9,7 @@ from command import Command
 from actions import Actions
 from item import Item
 from character import Character
-from quest import Quest, QuestStep
+from quest import Quest, QuestManager
 
 
 class Game:
@@ -180,27 +180,27 @@ class Game:
 
         # Setup quests
         def _setup_quests(self):
-        """Initialize all quests."""
-        key_quest = Quest(
-            title="Obtenez la clé de l'étage",
-            description="Parlez au personnage de la famille Abbot vous en apprendra plus sur ce monde",
-            objectives=["Parler à Lee Abbot", "Aider le"],
-            reward="clé-étage"
-        )
+            """Initialize all quests."""
+            key_quest = Quest(
+                title="Obtenez la clé de l'étage",
+                description="Parlez au personnage de la famille Abbot vous en apprendra plus sur ce monde",
+                objectives=["Parler à Lee Abbot", "Aider le"],
+                reward="clé-étage"
+            )
 
-        cables_quest = Quest(
-            title="obtenez des câbles",
-            description="Fouillez la voiture abandonnée",
-            objectives=["Trouver le pied de biche","Entrer dans la voiture", "utiliser le pied de biche pour ouvrir le tableau de bord"],
-            reward="câbles"
-        )
+            cables_quest = Quest(
+                title="obtenez des câbles",
+                description="Fouillez la voiture abandonnée",
+                objectives=["Trouver le pied de biche","Entrer dans la voiture", "utiliser le pied de biche pour ouvrir le tableau de bord"],
+                reward="câbles"
+            )
 
-        microphone_quest = Quest(
-            title="Trouvez un microphone",
-            description="Parvenez à entrer à l'étage pour trouver un microphone",
-            objectives=["Obtenir la clé de l'étage", "Aller à l'étage"]
-            reward="microphone"
-        )
+            microphone_quest = Quest(
+                title="Trouvez un microphone",
+                description="Parvenez à entrer à l'étage pour trouver un microphone",
+                objectives=["Obtenir la clé de l'étage", "Aller à l'étage"],
+                reward="microphone"
+            )
 
         # Add quests to player's quest manager
         self.player.quest_manager.add_quest(key_quest)

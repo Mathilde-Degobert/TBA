@@ -30,18 +30,7 @@ class Quest:
         self.objectives = objectives if objectives is not None else []
         self.completed_objectives = []
         self.is_completed = False
-        self.is_active = False
         self.reward = reward
-
-
-    def activate(self):
-        """
-        Activate the quest.
-        """
-        self.is_active = True
-        print(f"\n Nouvelle quête activée: {self.title}")
-        print(f"{self.description}\n")
-
 
     def complete_objective(self, objective, player=None):
         """
@@ -90,8 +79,6 @@ class Quest:
         Returns:
             str: A formatted string showing the quest status.
         """
-        if not self.is_active:
-            return f"{self.title} (Non activée)"
         if self.is_completed:
             return f"{self.title} (Terminée)"
         completed_count = len(self.completed_objectives)
@@ -241,44 +228,6 @@ class Quest:
                 return True
         return False
 
-"""""
-    def check_counter_objective(self, counter_name, current_count, player=None):
-"""        """
-        Check objectives that require counting (e.g., visit X rooms, collect Y items).
-        
-        Args:
-            counter_name (str): The name of what is being counted.
-            current_count (int): The current count.
-            player: The player object (optional).
-            
-        Returns:
-            bool: True if an objective was completed, False otherwise.
-            
-        Examples:
-        
-        >>> quest = Quest("Walker", "Walk a lot", ["Marcher 5 fois"])
-        >>> quest.check_counter_objective("Marcher", 3)
-        False
-        >>> quest.check_counter_objective("Marcher", 5) # doctest: +ELLIPSIS
-        ✅ Objectif accompli: Marcher 5 fois
-        <BLANKLINE>
-        🏆 Quête terminée: Walker
-        <BLANKLINE>
-        True"""
-        """
-        for objective in self.objectives:
-            if counter_name in objective and objective not in self.completed_objectives:
-                # Extract number from objective (e.g., "Visiter 3 lieux" -> 3)
-                words = objective.split()
-                for word in words:
-                    if word.isdigit():
-                        required_count = int(word)
-                        if current_count >= required_count:
-                            self.complete_objective(objective, player)
-                            return True
-        return False
-"""""
-
     def __str__(self):
         """
         Return a string representation of the quest.
@@ -312,7 +261,6 @@ class QuestManager:
         0
         """
         self.quests = []
-        self.active_quests = []
         self.player = player
 
 
@@ -325,41 +273,6 @@ class QuestManager:
         """
         self.quests.append(quest)
 
-
-    def activate_quest(self, quest_title):
-        """
-        Activate a quest by its title.
-        
-        Args:
-            quest_title (str): The title of the quest to activate.
-            
-        Returns:
-            bool: True if quest was found and activated, False otherwise.
-            
-        Examples:
-        
-        >>> manager = QuestManager()
-        >>> quest = Quest("Epic Quest", "An epic adventure")
-        >>> manager.add_quest(quest)
-        >>> manager.activate_quest("Epic Quest")
-        <BLANKLINE>
-        🗡️  Nouvelle quête activée: Epic Quest
-        📝 An epic adventure
-        <BLANKLINE>
-        True
-        >>> len(manager.active_quests)
-        1
-        >>> manager.activate_quest("Unknown Quest")
-        False
-        """
-
-        for quest in self.quests:
-            if quest.title == quest_title and not quest.is_active:
-                quest.activate()
-                self.active_quests.append(quest)
-                return True
-        return False
-
     def complete_objective(self, objective_text):
         """
         Complete an objective in any active quest.
@@ -369,32 +282,12 @@ class QuestManager:
             
         Returns:
             bool: True if objective was found and completed, False otherwise.
-            
-        Examples:
-        
-        >>> manager = QuestManager()
-        >>> quest = Quest("Manager Quest", "Test", ["Do something"])
-        >>> manager.add_quest(quest)
-        >>> manager.activate_quest("Manager Quest") # doctest: +NORMALIZE_WHITESPACE
-        <BLANKLINE>
-        🗡️  Nouvelle quête activée: Manager Quest
-        📝 Test
-        <BLANKLINE>
-        True
-        >>> manager.complete_objective("Do something") # doctest: +NORMALIZE_WHITESPACE
-        ✅ Objectif accompli: Do something
-        <BLANKLINE>
-        🏆 Quête terminée: Manager Quest
-        <BLANKLINE>
-        True
-        >>> manager.complete_objective("Do nothing")
-        False
         """
-        for quest in self.active_quests:
+        for quest in self.quests:
             if quest.complete_objective(objective_text):
-                # Remove completed quests from active list
+                # Remove completed quests
                 if quest.is_completed:
-                    self.active_quests.remove(quest)
+                    self.quests.remove(quest)
                 return True
         return False
 
@@ -405,30 +298,11 @@ class QuestManager:
         
         Args:
             room_name (str): The name of the room visited.
-            
-        Examples:
-        
-        >>> manager = QuestManager()
-        >>> quest = Quest("Visit Places", "Visit rooms", ["Visiter Library"])
-        >>> manager.add_quest(quest)
-        >>> manager.activate_quest("Visit Places") # doctest: +NORMALIZE_WHITESPACE
-        <BLANKLINE>
-        🗡️  Nouvelle quête activée: Visit Places
-        📝 Visit rooms
-        <BLANKLINE>
-        True
-        >>> manager.check_room_objectives("Library") # doctest: +NORMALIZE_WHITESPACE
-        ✅ Objectif accompli: Visiter Library
-        <BLANKLINE>
-        🏆 Quête terminée: Visit Places
-        <BLANKLINE>
-        >>> len(manager.active_quests)
-        0
         """
-        for quest in self.active_quests[:]:  # Use slice to avoid modification during iteration
+        for quest in self.quests[:]:  # Use slice to avoid modification during iteration
             quest.check_room_objective(room_name, self.player)
             if quest.is_completed:
-                self.active_quests.remove(quest)
+                self.quests.remove(quest)
 
 
     def check_action_objectives(self, action, target=None):
@@ -438,92 +312,11 @@ class QuestManager:
         Args:
             action (str): The action performed.
             target (str): Optional target of the action.
-            
-        Examples:
-        
-        >>> manager = QuestManager()
-        >>> quest = Quest("Actions", "Do actions", ["parler avec roi"])
-        >>> manager.add_quest(quest)
-        >>> manager.activate_quest("Actions") # doctest: +NORMALIZE_WHITESPACE
-        <BLANKLINE>
-        🗡️  Nouvelle quête activée: Actions
-        📝 Do actions
-        <BLANKLINE>
-        True
-        >>> manager.check_action_objectives("parler", "roi") # doctest: +NORMALIZE_WHITESPACE
-        ✅ Objectif accompli: parler avec roi
-        <BLANKLINE>
-        🏆 Quête terminée: Actions
-        <BLANKLINE>
-        >>> len(manager.active_quests)
-        0
         """
-        for quest in self.active_quests[:]:
+        for quest in self.quests[:]:
             quest.check_action_objective(action, target, self.player)
             if quest.is_completed:
-                self.active_quests.remove(quest)
-
-
-   """def check_counter_objectives(self, counter_name, current_count):
-        """
-       """ Check all active quests for counter-related objectives.
-        
-        Args:
-            counter_name (str): The name of what is being counted.
-            current_count (int): The current count.
-            
-        Examples:
-        
-        >>> manager = QuestManager()
-        >>> quest = Quest("Counter", "Count things", ["Compter 3 fois"])
-        >>> manager.add_quest(quest)
-        >>> manager.activate_quest("Counter") # doctest: +NORMALIZE_WHITESPACE
-        <BLANKLINE>
-        🗡️  Nouvelle quête activée: Counter
-        📝 Count things
-        <BLANKLINE>
-        True
-        >>> manager.check_counter_objectives("Compter", 2)
-        >>> len(manager.active_quests)
-        1
-        >>> manager.check_counter_objectives("Compter", 3) # doctest: +NORMALIZE_WHITESPACE
-        ✅ Objectif accompli: Compter 3 fois
-        <BLANKLINE>
-        🏆 Quête terminée: Counter
-        <BLANKLINE>
-        >>> len(manager.active_quests)
-        0
-        """
-    """    for quest in self.active_quests[:]:
-            quest.check_counter_objective(counter_name, current_count, self.player)
-            if quest.is_completed:
-                self.active_quests.remove(quest)
-"""
-
-    def get_active_quests(self):
-        """
-        Get all active quests.
-        
-        Returns:
-            list: List of active quests.
-            
-        Examples:
-        
-        >>> manager = QuestManager()
-        >>> quest = Quest("Active Quest", "An active quest")
-        >>> manager.add_quest(quest)
-        >>> len(manager.get_active_quests())
-        0
-        >>> manager.activate_quest("Active Quest")
-        <BLANKLINE>
-        🗡️  Nouvelle quête activée: Active Quest
-        📝 An active quest
-        <BLANKLINE>
-        True
-        >>> len(manager.get_active_quests())
-        1
-        """
-        return self.active_quests
+                self.quests.remove(quest)
 
 
     def get_all_quests(self):
@@ -532,16 +325,6 @@ class QuestManager:
         
         Returns:
             list: List of all quests.
-            
-        Examples:
-        
-        >>> manager = QuestManager()
-        >>> quest1 = Quest("Q1", "First")
-        >>> quest2 = Quest("Q2", "Second")
-        >>> manager.add_quest(quest1)
-        >>> manager.add_quest(quest2)
-        >>> len(manager.get_all_quests())
-        2
         """
         return self.quests
 
@@ -555,19 +338,6 @@ class QuestManager:
             
         Returns:
             Quest: The quest if found, None otherwise.
-            
-        Examples:
-        
-        >>> manager = QuestManager()
-        >>> quest1 = Quest("Find Key", "Find the golden key")
-        >>> quest2 = Quest("Open Door", "Open the locked door")
-        >>> manager.add_quest(quest1)
-        >>> manager.add_quest(quest2)
-        >>> found = manager.get_quest_by_title("Find Key")
-        >>> found.title
-        'Find Key'
-        >>> manager.get_quest_by_title("Unknown") is None
-        True
         """
         for quest in self.quests:
             if quest.title == title:
@@ -578,29 +348,14 @@ class QuestManager:
     def show_quests(self):
         """
         Display all quests and their status.
-        
-        Examples:
-        
-        >>> manager = QuestManager()
-        >>> manager.show_quests()
-        <BLANKLINE>
-        Aucune quête disponible.
-        <BLANKLINE>
-        >>> quest = Quest("Display Quest", "Test display")
-        >>> manager.add_quest(quest)
-        >>> manager.show_quests() # doctest: +NORMALIZE_WHITESPACE
-        <BLANKLINE>
-        📋 Liste des quêtes:
-        ❓ Display Quest (Non activée)
-        <BLANKLINE>
         """
         if not self.quests:
             print("\nAucune quête disponible.\n")
             return
 
-        print("\n📋 Liste des quêtes:")
+        print("\nListe des quêtes:")
         for quest in self.quests:
-            print(f"  {quest.get_status()}")
+            print(f"{quest.get_status()}")
         print()
 
 
