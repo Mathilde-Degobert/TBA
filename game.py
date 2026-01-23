@@ -9,7 +9,7 @@ from command import Command
 from actions import Actions
 from item import Item
 from character import Character
-from quest import Quest, QuestManager
+from quest import Quest, QuestManager, DialogueStep
 
 
 class Game:
@@ -23,7 +23,8 @@ class Game:
         self.player = None
         self.character = []
         self.quests = []
-    
+        self.dialogue_steps = []
+        
     # Setup the game
     def setup(self):
         """Setup the game rooms, items, characters, and player."""
@@ -58,36 +59,36 @@ class Game:
 
 
         # Setup rooms
-        forest = Room("Forest", " un sentier sombre, une cabane abandonnée et "
+        forest = Room("forest", " un sentier sombre, une cabane abandonnée et "
         "le bruit assourdissant d'une cascade.")
         self.rooms.append(forest)
 
-        Maison_rez_de_chaussée = Room("Rez de chaussée", " une grande pièce abandonée, "
+        Maison_rez_de_chaussée = Room("rez de chaussée", " une grande pièce abandonée, "
         "un silence lugubre règne. La seule trace de vie : "
         "des traces de passage dans la poussière du parquet qui menace de craquer à chaque pas.")
         self.rooms.append(Maison_rez_de_chaussée)
 
-        Maison_étage = Room("Etage", " une odeur de pourriture et de moisissure,"
+        Maison_étage = Room("étage", " une odeur de pourriture et de moisissure,"
         "un fin rayon de lumière révèle les lieux autrement noyé par le noir. "
         "Les murs semblent écouter, vous retenez votre souffle.")
         self.rooms.append(Maison_étage)
 
-        Champs = Room("Champs", " un champs de maïs peu entrenu, "
+        Champs = Room("champs", " un champs de maïs peu entrenu, "
         "un petit sentier de sable sillone les brins séchés. "
         "Au loin vous apercevez un silo abandonné, abimé par le passage du temps.")
         self.rooms.append(Champs)
 
-        Magasin = Room("Magasin", " une ruelle au bitume éclatée, "
+        Magasin = Room("magasin", " une ruelle au bitume éclatée, "
         "la devanture cassée révèle une superette aux rayons renversés.")
         self.rooms.append(Magasin)
 
         pont = Room("pont", " un grand pont un peu fissuré.")
         self.rooms.append(pont)
 
-        Voiture = Room("Voiture", " une vielle cadillac bleu aux phares jaunies et à la carosserie.")
+        Voiture = Room("voiture", " une vielle cadillac bleu aux phares jaunies et à la carosserie.")
         self.rooms.append(Voiture)
 
-        Sous_sol = Room("Sous-sol", " une pièce humide, plongée dans le noir, "
+        Sous_sol = Room("sous-sol", " une pièce humide, plongée dans le noir, "
         "jonchée d'objets en tout genre.")
         self.rooms.append(Sous_sol)
 
@@ -107,40 +108,35 @@ class Game:
         "U": Maison_rez_de_chaussée, "D": None}
       
         # Setup items
-        # Items : MATÉRIAUX trouvables sur la map
+        # Items trouvables sur la map
+            # MATERIAUX
         Modulateur = Item("modulateur", "Module d'amplification (matériau)", 12)
         forest.items[Modulateur.name] = Modulateur
-
         Batterie = Item("batterie", "Vieille batterie (matériau)", 60)
         pont.items[Batterie.name] = Batterie
-
         Piles = Item("piles", "Boîte de 4 piles (matériau)", 10)
         Magasin.items[Piles.name] = Piles
-
         CarteMere = Item("carte-mère", "Carte mère d'ordinateur (matériau)", 25)
         Champs.items[CarteMere.name] = CarteMere
-
-        Câbles = Item("câbles", "Des câbles électriques (matériau)", 5)
-        Voiture.items[Câbles.name] = Câbles
-
-        Clés_sous_sol = Item("clés", "les clés menant au sous-sol", 1)
-        Voiture.items[Clés_sous_sol.name] = Clés_sous_sol
-        
-        # Table de bricolage (pour l'assemblage du dispositif final)
         Table_bricolage = Item("table", "une table de bricolage avec tous les outils nécessaires", 50000)
         Sous_sol.items[Table_bricolage.name] = Table_bricolage
-
+            # OUTILS
+        Clés_sous_sol = Item("clés", "les clés menant au sous-sol", 1)
+        Voiture.items[Clés_sous_sol.name] = Clés_sous_sol
+        pied_de_biche = Item("pied-de-biche", "Un pied-de-biche solide (outil)", 4.0)
+        pont.items[pied_de_biche.name] = pied_de_biche
+       
         # Récompenses de quêtes :
             # MATERIAUX
         Microphone = Item("microphone", "Microphone de babyphone (matériau)", 15)
         Appareil_Auditif = Item("appareil-auditif", "Appareil auditif ancien (matériau)", 8)
+        Câbles = Item("câbles", "Des câbles électriques (matériau)", 5)
             # OUTILS
         Marteau = Item("marteau", "Un marteau robuste (outil)", 2.5)
         Tournevis = Item("tournevis", "Un tournevis multifonction (outil)", 1.5)
         Cle_a_molette = Item("clé-molette", "Une clé à molette (outil)", 3.0)
         Clé_Etage = Item("clé-étage", "la clé menant à l'étage (outil)", 1)
         Dispositif_ultrasons = Item("dispositif", "un dispositif à ultrasons (créé)", 8.0)
-        pied_de_biche = Item("pied-de-biche", "Un pied-de-biche solide (outil)", 4.0)
         Sous_sol.items[pied_de_biche.name] = pied_de_biche
 
         # Setup Characters
@@ -176,32 +172,48 @@ class Game:
 
         # Setup player and starting room
         self.player = Player(input("\nEntrez votre nom: "))
-        self.player.current_room = Sous_sol
+        self.player.current_room = pont
 
         # Setup quests
-        def _setup_quests(self):
-            """Initialize all quests."""
-            key_quest = Quest(
-                title="Obtenez la clé de l'étage",
-                description="Parlez au personnage de la famille Abbot vous en apprendra plus sur ce monde",
-                objectives=["Parler à Lee Abbot", "Aider le"],
-                reward="clé-étage"
-            )
+        self.setup_quests()
 
-            cables_quest = Quest(
-                title="obtenez des câbles",
-                description="Fouillez la voiture abandonnée",
-                objectives=["Trouver le pied de biche","Entrer dans la voiture", "utiliser le pied de biche pour ouvrir le tableau de bord"],
-                reward="câbles"
-            )
+    def setup_quests(self):
+        """Setup the quests for the game."""
+        key_quest = Quest(
+            title="1 - Obtenir la clé de l'étage",
+            description="Parler au personnage de la famille Abbot vous en apprendra plus sur ce monde",
+            objectives=["Parler à Lee Abbot", "Aider le"],
+            character = "Lee Abbot",
+            dialogue = [ ("Lee Abbott est occupé à installer de l'isolant sur les murs du sous-sol. Il vous aperçoit et vous demande : 'Qu'est-ce que tu veux ?'"),
+            ("Lee Abbott sourit avec soulagement et vous dit : 'C'est gentil ! Tu peux m'aider à tenir les panneaux ? Avec toi, ce sera beaucoup plus facile.'"),
+            ("Vous avez aidé Lee Abbott à installer l'isolant. Après plusieurs heures, le travail est enfin terminé. Il vous remercie chaleureusement et vous dit : 'Installe-toi à l'étage si tu veux. La pièce n'est pas utilisée par la famille. Tu y trouveras refuge.'")],
+            choices =  ["Puis-je vous aider ?", "Pouvez-vous me prêter un outil ?", "Je n'ai besoin de rien."],
+            correct_choices = ["Puis-je vous aider ?"],
+            reward = Item("clé-étage", "la clé menant à l'étage (outil)", 1)
+        )
 
-            microphone_quest = Quest(
-                title="Trouvez un microphone",
-                description="Parvenez à entrer à l'étage pour trouver un microphone",
-                objectives=["Obtenir la clé de l'étage", "Aller à l'étage"],
-                reward="microphone"
-            )
+        cables_quest = Quest(
+            title="2 - Obtenir les câbles",
+            description="Fouiller la voiture abandonnée pourrait vous être utile",
+            objectives=["Trouver un pied-de-biche","Entrer dans la voiture", "Utiliser le pied-de-biche"],
+            character = None,
+            dialogue = [],
+            choices =  [],
+            correct_choices = [],
+            reward=Item("câbles", "Câbles récupérés du tableau de bord", 1.0)
+        )
 
+        microphone_quest = Quest(
+            title="3 - Trouver le microphone",
+            description="Parvenir à entrer à l'étage pour faire une découverte importante",
+            objectives=["Obtenir la clé de l'étage", "Aller à l'étage"],
+            character = None,
+            dialogue = [],
+            choices =  [],
+            correct_choices = [],
+            reward=Item("microphone", "Microphone trouvé à l'étage", 1.0)
+        )
+   #reward = Item("dispositif d'ultrasons", "Dispositif d'ultrasons assemblé", 1.0)
         # Add quests to player's quest manager
         self.player.quest_manager.add_quest(key_quest)
         self.player.quest_manager.add_quest(cables_quest)

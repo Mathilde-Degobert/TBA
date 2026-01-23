@@ -1,4 +1,5 @@
 # Define the Player class.
+from quest import QuestManager
 
 class Player():
     """
@@ -42,7 +43,6 @@ class Player():
 
         # Increment move counter
         self.move_count += 1
-        self.quest_manager.check_counter_objectives("Se déplacer", self.move_count)
         
         return True
 
@@ -55,10 +55,21 @@ class Player():
         Args:
             reward (str): The reward to add.
         """
-        if reward and reward not in self.inventory:
-            self.inventory[reward] = reward
-            print(f"\nVous avez obtenu: {reward}\n")
-
+        if reward:
+            if self.check_inventory_space(reward.weight):
+                self.inventory[reward.name] = reward
+                print(f"Vous avez obtenu : {reward.name}\n")
+                # Si c'est le dispositif d'ultrasons, retire les matériaux utilisés
+                if reward.name == "dispositif d'ultrasons":
+                    materiaux_requis = ["modulateur", "batterie", "piles", "câbles", "microphone", "appareil-auditif", "carte-mère"]
+                    for mat in materiaux_requis:
+                        if mat in self.inventory:
+                            del self.inventory[mat]
+                return True
+            else:
+                current_room.items[reward.name] = reward
+                print(f"\nVotre inventaire est trop plein pour {reward.name}. L'objet a été déposé dans la pièce.\n")
+                return False
 
     # Define the history method.
     def get_history(self):

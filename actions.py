@@ -258,6 +258,10 @@ class Actions:
             item = player.current_room.items.pop(item_name)
             player.inventory[item_name] = item
             print(f"\nVous avez pris '{item_name}'.\n")
+            
+            # Vérifier les objectifs d'action pour la quête (ex: "Trouver le pied de biche")
+            game.player.quest_manager.check_action_objectives("Trouver", item_name)
+            
             return True 
 
     def drop(game, list_of_words, number_of_parameters):
@@ -334,21 +338,22 @@ class Actions:
             print(MSG1.format(command_word=command_word))
             return False
         
-        player = game.player
-        character_name = list_of_words[1].lower()
-        
-        # Find the character in the current room
-        character_found = None
-        for character in game.character:
-            character_first_name = character.name.split()[0].lower()
-            if character.name.lower() == character_name or character_first_name == character_name:
-                # Check if character is in the same room as the player
-                if character.current_room is player.current_room:
-                    character_found = character
-                    break      
-        if character_found is None:
-            print(f"\n'{character_name}' n'est pas dans la pièce.\n")
-            return False
+        if len(game.player.current_room.characters) >= 1:
+            character_name = list_of_words[1].lower()
+            character = game.player.current_room.get_character(character_name)
+            if character is not None:
+                if not Actions.check_pnj_quest(game, character):
+                    print(character.get_msg())
+            else:
+                print(f"Il n'y a pas de personnage nommé {character_name} dans cette pièce.")
+        else:
+            print("Il n'y a aucun PNJ dans cette pièce")
+        return True
+
+        # Vérifier les objectifs d'action pour la quête (ex: "Parler à Lee Abbott")
+        game.player.quest_manager.check_action_objectives("Parler", character_found.name)
+        return True
+
 #####
 
     @staticmethod
@@ -385,29 +390,16 @@ class Actions:
         inventaire_items = list(inventaire_lower.keys())
 
         # Vérifie les conditions d'utilisation
-        success, quest_reward = Actions.check_condition_outils(game, item_name, localisation, objets_piece, inventaire_items)
+        success = Actions.check_condition_outils(game, item_name, localisation, objets_piece, inventaire_items)
         if not success:
             print(f"\n{item_name} ne vous est pas utile.\n")
             return False
 
-        print(f"\nVous avez utilisé {item_name} avec succès.\n")
+        print(f"\nVous avez utilisé le {item_name} avec succès.\n")
+        del player.inventory[item_name]
 
-        # Ajoute la récompense à l'inventaire ou à la pièce
-        if quest_reward:
-            if player.check_inventory_space(quest_reward.weight):
-                player.inventory[quest_reward.name] = quest_reward
-                print(f"Vous avez obtenu : {quest_reward.name}\n")
-                del player.inventory[item_name]
-                # Si c'est le dispositif d'ultrasons, retire les matériaux utilisés
-                if quest_reward.name == "dispositif d'ultrasons":
-                    materiaux_requis = ["modulateur", "batterie", "piles", "câbles", "microphone", "appareil-auditif", "carte-mère"]
-                    for mat in materiaux_requis:
-                        if mat in player.inventory:
-                            del player.inventory[mat]
-            else:
-                current_room.items[quest_reward.name] = quest_reward
-                print(f"\nVotre inventaire est trop plein pour {quest_reward.name}. L'objet a été déposé dans la pièce.\n")
-                return False
+        # Vérifier les objectifs d'action pour la quête (ex: "Utiliser la clé-étage")
+        game.player.quest_manager.check_action_objectives("Utiliser", item_name)
         return True
 
     @staticmethod
@@ -420,21 +412,16 @@ class Actions:
         # Clé à l'étage
         if outil == "clé-étage":
             if localisation == "etage":
-                from item import Item
-                quest_reward = Item("Microphone", "Microphone trouvé à l'étage", 1.0)
                 print("\nVous avez réussi à ouvrir la porte de l'étage et trouvez un microphone par terre !\n")
-                return True, quest_reward
+                return True
             print("\nVous devez être à l'étage pour utiliser la clé.\n")
-            return False, None
+            return False
         # Pied-de-biche dans la voiture
         if outil == "pied-de-biche":
             if localisation == "voiture":
-                from item import Item
-                quest_reward = Item("câbles", "Câbles récupérés du tableau de bord", 1.0)
-                print("\nVous avez réussi à ouvrir le tableau de bord et récupérer les câbles !\n")
-                return True, quest_reward
+                return True
             print("\nVous devez être dans la voiture pour utiliser le pied-de-biche.\n")
-            return False, None
+            return False
         # Tournevis au sous-sol avec table et matériaux
         if outil == "tournevis":
             if localisation == "sous_sol":
@@ -442,229 +429,28 @@ class Actions:
                     materiaux_requis = ["modulateur", "batterie", "piles", "câbles", "microphone", "appareil-auditif", "carte-mère"]
                     manquants = [mat for mat in materiaux_requis if mat not in inventaire]
                     if not manquants:
-                        from item import Item
-                        quest_reward = Item("dispositif d'ultrasons", "Dispositif d'ultrasons assemblé", 1.0)
                         print("\nVous avez fabriqué le dispositif d'ultrasons avec succès !\n")
-                        return True, quest_reward
+                        return True
                     print("\nIl vous manque les matériaux suivants :")
                     for mat in manquants:
                         print(f" - {mat}")
-                    return False, None
+                    return False
                 print("\nVous devez avoir une table dans la pièce pour utiliser le tournevis au sous-sol.\n")
-                return False, None
-            print("\nVous devez être au sous-sol pour utiliser le tournevis.\n")
-            return False, None
-        return False, None
-
-
-    @staticmethod
-    def check_quest_talk(game, character):
-        """
-        Vérifier si le personnage avec lequel le joueur parle est lié à une quête en cours.
-        Args:
-            game (Game): L'objet du jeu.
-            character (Character): Le personnage avec lequel le joueur parle.
-        Returns:
-            bool: True si la quête a avancé, False sinon.
-        """
-        if character is None:
-            return False
-        for quest in game.quests:
-            current_step = quest.get_current_step()
-            if current_step and current_step.character == character:
-                if game.player.current_room == character.current_room:
-                    Actions.handle_special_responses(current_step)
-                    if Actions.handle_choices(current_step, quest):
-                        Actions.advance_quest(game, quest)
-                    return True
-                l="Vous devez être dans la salle "
-                v = " pour parler à "
-                print(l + character.current_room.name + v + character.name)
                 return False
+            print("\nVous devez être au sous-sol pour utiliser le tournevis.\n")
+            return False
         return False
 
 
-        # Cas spécial pour Lee Abbott: vérifier si la quête continue
-        if character_found.name == "Lee Abbot":
-            lee_quest = None
-            for quest in game.quests:
-                if quest.title == "Interagir avec Lee Abbott":
-                    lee_quest = quest
-                    break
-            
-            # Vérifier si le joueur a déjà les clés ET le tournevis
-            has_keys = "clé-étage" in player.inventory
-            has_screwdriver = "tournevis" in player.inventory
-            
-            # Si quête complétée ET a tous les items, terminer
-            if has_keys and has_screwdriver:
-                print(f"\nLee Abbott: Bravo ! Tu as tout ce qu'il te faut. Bonne chance !\n")
-                if lee_quest:
-                    lee_quest.reset_to_step(len(lee_quest.steps))
-                return True
-            
-            # Sinon, proposer les choix restants
-            if lee_quest:
-                current_step = lee_quest.get_current_step()
-                if current_step:
-                    print(f"\n{current_step.description}\n")
-                    response = current_step.get_current_response()
-                    if response:
-                        print(response)
-                    
-                    # Afficher les choix non encore effectués avec leurs numéros originaux
-                    if current_step.get_current_choices():
-                        choices = current_step.get_current_choices()
-                        
-                        print("\nChoix disponibles:")
-                        choice_mapping = {}  # Mapper les numéros affichés aux choix
-                        displayed_num = 1
-                        
-                        for original_idx, choice in enumerate(choices):
-                            # Masquer le choix "Pouvez-vous me prêter un outil ?" si le tournevis n'a pas été obtenu
-                            if choice == "Pouvez-vous me prêter un outil ?" and "tournevis" not in player.inventory:
-                                continue
-                            if choice not in lee_quest.completed_paths:
-                                print(f"{original_idx + 1}. {choice}")
-                                choice_mapping[original_idx + 1] = choice
-                        
-                        if choice_mapping:
-                            user_input = input("Votre choix: ")
-                            try:
-                                choice_num = int(user_input)
-                                if choice_num in choice_mapping:
-                                    chosen_option = choice_mapping[choice_num]
-                                    print(f"\nVous avez choisi: {chosen_option}\n")
-                                    
-                                    # Marquer ce choix comme complété
-                                    lee_quest.completed_paths.append(chosen_option)
-                                    
-                                    # Avancer et afficher la réaction
-                                    lee_quest.advance()
-                                    next_step = lee_quest.get_current_step()
-                                    
-                                    if next_step:
-                                        # Adapter le message en fonction du choix
-                                        if chosen_option == "Puis-je vous aider ?":
-                                            print(f"\n{next_step.description}\n")
-                                            response = next_step.get_current_response()
-                                            if response:
-                                                print(response)
-                                            # Ajouter la récompense
-                                            if next_step.reward:
-                                                if player.check_inventory_space(next_step.reward.weight):
-                                                    player.inventory[next_step.reward.name] = next_step.reward
-                                                    print(f"\nVous avez obtenu: {next_step.reward.name}\n")
-                                                else:
-                                                    print(f"\n⚠️ Votre inventaire est trop plein pour {next_step.reward.name}.\n")
-                                        elif chosen_option == "Pouvez-vous me prêter un outil ?":
-                                            print(f"\nLee Abbott réfléchit un moment et dit : 'Je pourrais te prêter un outil. Lequel te serait utile ?'\n")
-                                            print("Voici les outils disponibles:")
-                                            print("1. Marteau")
-                                            print("2. Tournevis")
-                                            print("3. Clé à molette\n")
-                                            
-                                            tool_input = input("Quel outil voulez-vous ? ")
-                                            try:
-                                                tool_choice = int(tool_input)
-                                                from item import Item
-                                                tools = {
-                                                    1: Item("marteau", "Un marteau robuste (outil)", 2.5),
-                                                    2: Item("tournevis", "Un tournevis multifonction (outil)", 1.5),
-                                                    3: Item("clé-molette", "Une clé à molette (outil)", 3.0)
-                                                }
-                                                tool_names = {1: "marteau", 2: "tournevis", 3: "clé-molette"}
-                                                
-                                                if tool_choice in tools:
-                                                    tool_item = tools[tool_choice]
-                                                    tool_name = tool_names[tool_choice]
-                                                    if player.check_inventory_space(tool_item.weight):
-                                                        player.inventory[tool_name] = tool_item
-                                                        print(f"\nLee Abbott vous donne le {tool_name}.\n")
-                                                        print(f"Vous avez obtenu: {tool_name}\n")
-                                                    else:
-                                                        print(f"\n Votre inventaire est trop plein pour le {tool_name}.\n")
-                                            except ValueError:
-                                                print("Choix invalide.")
-                                        else:
-                                            # Choix 3: "Je n'ai besoin de rien"
-                                            print(f"\nLee Abbott hausse les épaules et retourne à son travail.\n")
-                                        
-                                        # Réinitialiser la quête à l'étape 1 pour relancer le dialogue
-                                        lee_quest.reset_to_step(0)
-                            except ValueError:
-                                print("Choix invalide.")
-                                return False
-                        else:
-                            print("\nLee Abbott: Tu as déjà exploré tous tes choix pour le moment...\n")
-                return True
-        
-        # Chercher une quête liée à ce personnage (pour les autres PNJ)
-        quest_for_character = None
-        for quest in game.quests:
-            if not quest.is_complete():
-                current_step = quest.get_current_step()
-                if current_step and current_step.character == character_found.name:
-                    quest_for_character = quest
-                    break
-        
-        # Si une quête est liée à ce personnage, afficher l'étape de quête
-        if quest_for_character:
-            current_step = quest_for_character.get_current_step()
-            print(f"\n{current_step.description}\n")
-            
-            # Afficher les réponses de la quête
-            response = current_step.get_current_response()
-            if response:
-                print(response)
-            
-            # Gérer les choix
-            if current_step.get_current_choices():
-                if Actions.handle_choices(current_step, quest_for_character):
-                    # handle_choices a géré les choix correctement, avancer la quête
-                    quest_for_character.advance()
-                    next_step = quest_for_character.get_current_step()
-                    
-                    if next_step:
-                        # Afficher l'étape suivante
-                        print(f"\n{next_step.description}\n")
-                        response = next_step.get_current_response()
-                        if response:
-                            print(response)
-                        
-                        # Ajouter la récompense
-                        if next_step.reward:
-                            if player.check_inventory_space(next_step.reward.weight):
-                                player.inventory[next_step.reward.name] = next_step.reward
-                                print(f"\nVous avez obtenu: {next_step.reward.name}\n")
-                            else:
-                                print(f"\n Votre inventaire est trop plein pour {next_step.reward.name}.\n")
-            else:
-                # Pas de choix, juste avancer l'étape
-                quest_for_character.advance()
-                if current_step.reward:
-                    if player.check_inventory_space(current_step.reward.weight):
-                        player.inventory[current_step.reward.name] = current_step.reward
-                        print(f"\nVous avez obtenu: {current_step.reward.name}\n")
-        else:
-            # Pas de quête liée, juste afficher le message du personnage
-            message = character_found.get_msg()
-            print(f"\n{character_found.name} : {message}\n")
-        
-        return True
-
-    
-    
-
+    @staticmethod
     def quests(game, list_of_words, number_of_parameters):
         """
         Show all quests and their status.
-       
+        
         Args:
             game (Game): The game object.
             list_of_words (list): The list of words in the command.
             number_of_parameters (int): The number of parameters expected by the command.
-
 
         Returns:
             bool: True if the command was executed successfully, False otherwise.
@@ -677,56 +463,23 @@ class Actions:
             return False
 
         # Show all quests
-        if game.quests:
-            print("\nListe des quêtes:")
-            print("=" * 50)
-            
-            # Display main quests
-            main_quests = [q for q in game.quests if q.is_main_quest]
-            if main_quests:
-                print("\n★ QUÊTES PRINCIPALES ★")
-                for quest in main_quests:
-                    if quest.is_complete():
-                        status = "✓ Complétée"
-                    elif quest.current_step > 0:
-                        status = "➤ En cours"
-                    else:
-                        status = "○ Non démarrée"
-                    print(f"  {quest.title} [{status}]")
-                    print(f"    {quest.description}")
-            
-            # Display secondary quests
-            secondary_quests = [q for q in game.quests if not q.is_main_quest]
-            if secondary_quests:
-                print("\n◆ QUÊTES SECONDAIRES ◆")
-                for i, quest in enumerate(secondary_quests, 1):
-                    if quest.is_complete():
-                        status = "✓ Complétée"
-                    elif quest.current_step > 0:
-                        status = "➤ En cours"
-                    else:
-                        status = "○ Non démarrée"
-                    print(f"  {i}. {quest.title} [{status}]")
-                    print(f"     {quest.description}")
-            
-            print("\n" + "=" * 50)
-        else:
-            print("\nAucune quête disponible.\n")
+        game.player.quest_manager.show_quests()
         return True
 
 
     @staticmethod
     def quest(game, list_of_words, number_of_parameters):
         """
-        Show details about a specific quest and its current step.
-       
+        Show details about a specific quest.
+        
         Args:
             game (Game): The game object.
             list_of_words (list): The list of words in the command.
             number_of_parameters (int): The number of parameters expected by the command.
-        Returns:
-            bool: True if the command was executed successfully, False otherwise """
 
+        Returns:
+            bool: True if the command was executed successfully, False otherwise.
+        """
         # If the number of parameters is incorrect, print an error message and return False.
         n = len(list_of_words)
         if n < number_of_parameters + 1:
@@ -737,29 +490,42 @@ class Actions:
         # Get the quest title from the list of words (join all words after command)
         quest_title = " ".join(list_of_words[1:])
 
-        # Find and show quest details
-        for quest in game.quests:
-            if quest.title.lower() == quest_title.lower():
-                print(f"\n=== Quête: {quest.title} ===")
-                print(f"Description: {quest.description}")
-                print(f"Progression: {quest.current_step + 1}/{len(quest.steps)}")
-                
-                current_step = quest.get_current_step()
-                if current_step:
-                    print(f"\nÉtape actuelle: {current_step.description}")
-                else:
-                    print("\nQuête complétée!")
-                return True
+        # Show quest details
+        game.player.quest_manager.show_quest_details(quest_title)
+        return True
+
+    @staticmethod
+    def check_pnj_quest(game, character_found):
+        """
+        Vérifier si le personnage avec lequel le joueur parle est lié à une quête en cours.
+        Args:
+            game (Game): L'objet du jeu.
+            character (Character): Le personnage avec lequel le joueur parle.
+        Returns:
+            bool: True si la quête a avancé, False sinon.
+        """
+        if character_found is None:
+            return False
         
-        print(f"\nQuête '{quest_title}' non trouvée.\n")
+        for quest in game.player.quest_manager.quests:
+            if quest.character == character_found.name and not quest.is_complete():
+                if game.player.current_room == character_found.current_room:
+                    Actions.handle_dialogue(current_step)
+                    if Actions.handle_choices(current_step, quest):
+                        Actions.advance_dialogue(game, quest)
+                    return True
+                l="Vous devez être dans la salle "
+                v = " pour parler à "
+                print(l + character_found.current_room.name + v + character_found.name)
+                return False
         return False
 
     @staticmethod
-    def handle_special_responses(current_step):
+    def handle_dialogue(current_step):
         """
-        Gérer les réponses spéciales pour une étape de quête donnée.
+        Gérer les réponses pour une étape du dialogue.
         Args:
-            current_step (QuestStep): L'étape de quête actuelle.
+            current_step (DialogueStep): L'étape de dialogue actuelle.
         """
         response = current_step.get_current_response()
         if response:
@@ -787,12 +553,12 @@ class Actions:
                     print(f"Vous avez choisi: {chosen_option}")
                     correct_choices = current_step.get_current_correct_choices()
                     if chosen_option in correct_choices:
-                        if current_step.advance_substep():
+                        if current_step.advance_step():
                             return True
-                        Actions.handle_special_responses(current_step)
+                        Actions.handle_dialogue(current_step)
                         return Actions.handle_choices(current_step, quest)
                     print("Choix incorrect. Vous devez recommencer l'étape.")
-                    current_step.reset_substep()  # Réinitialisation de la sous-étape
+                    current_step.reset_step()  # Réinitialisation de la sous-étape
                     return False
                 print("Choix invalide.")
                 return False
@@ -802,35 +568,34 @@ class Actions:
         return False
 
     @staticmethod
-    def advance_quest(game, quest):
+    def advance_dialogue(game, quest):
         """
-        Faire avancer la quête actuelle.
+        Faire avancer le dialogue.
         Args:
             game (Game): L'objet du jeu.
             quest (Quest): La quête actuelle.
         """
         current_step = quest.get_current_step()
-        if current_step.advance_substep():
+        if current_step.advance_step():
             quest.advance()
-            if current_step.reward:
-                game.player.inventory[current_step.reward.name] = current_step.reward
-                print(f"Vous avez reçu {current_step.reward.name} comme récompense.")
-            if quest.is_complete() and not quest.title == "La quête principale":
-                print(f"Félicitations, vous avez complété la quête: {quest.title}")
+            if current_step.reward_item:
+                game.player.inventory[current_step.reward_item.name] = current_step.reward_item
+                print(f"Vous avez reçu {current_step.reward_item.name} comme récompense.")
+            if quest.is_complete() and not quest.name == "La quête principale":
+                print(f"Félicitations, vous avez complété la quête: {quest.name}")
             else:
                 next_step = quest.get_current_step()
                 if next_step:
-                    next_step.current_substep = 0
+                    next_step.current_step = 0
                     print(f"Étape suivante: {next_step.description}")
                     if game.player.current_room == next_step.character.current_room:
-                        Actions.handle_special_responses(next_step)
+                        Actions.handle_dialogue(next_step)
                         Actions.handle_choices(next_step, quest)
                     else:
                         l = "Vous devez aller dans la salle "
                         v = " pour continuer la quête."
                         print(l + next_step.character.current_room.name + v)
         else:
-            Actions.handle_special_responses(current_step)
+            Actions.handle_dialogue(current_step)
             if not Actions.handle_choices(current_step, quest):
                 print("Vous avez échoué cette étape de la quête. Veuillez réessayer.")
-

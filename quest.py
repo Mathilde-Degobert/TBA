@@ -15,7 +15,7 @@ class Quest:
     """
 
 
-    def __init__(self, title, description, objectives=None, reward=None):
+    def __init__(self, title, description, objectives=None, reward=None, character=None, dialogue_step=None):
         """
         Initialize a new quest.
         
@@ -23,11 +23,17 @@ class Quest:
             title (str): The title of the quest.
             description (str): The description of the quest.
             objectives (list): List of objectives (default: empty list).
-            reward (str): Optional reward description.
+            reward (Item): The reward item (default: None).
+            character (str): The character associated with this quest (default: None).
+            dialogue (list): List of dialogue strings (default: empty list).
+            choices (list): List of available choices (default: empty list).
+            correct_choices (list): List of correct choices (default: empty list).
         """
         self.title = title
         self.description = description
         self.objectives = objectives if objectives is not None else []
+        self.character = character
+        self.dialogue_step = dialogue_step
         self.completed_objectives = []
         self.is_completed = False
         self.reward = reward
@@ -64,10 +70,9 @@ class Quest:
         """
         if not self.is_completed:
             self.is_completed = True
-            print(f"\nQuête terminée: {self.title}")
+            print(f"\nQuête {self.title} terminée !\n")
             if self.reward:
-                print(f"Récompense: {self.reward}")
-                if player:
+                if self.reward:
                     player.add_reward(self.reward)
             print()
 
@@ -108,7 +113,7 @@ class Quest:
                 details += f"  {status} {objective_text}\n"
 
         if self.reward:
-            details += f"\nRécompense: {self.reward}\n"
+            details += f"\nRécompense = {self.reward}\n"
 
         return details
 
@@ -163,24 +168,14 @@ class Quest:
             
         Returns:
             bool: True if an objective was completed, False otherwise.
-            
-        Examples:
-        
-        >>> quest = Quest("Explore", "Explore the castle", ["Visiter Castle"])
-        >>> quest.check_room_objective("Castle")
-        ✅ Objectif accompli: Visiter Castle
-        <BLANKLINE>
-        🏆 Quête terminée: Explore
-        <BLANKLINE>
-        True
-        >>> quest.check_room_objective("Tower")
-        False
         """
         room_objectives = [
             f"Visiter {room_name}",
             f"Explorer {room_name}",
             f"Aller à {room_name}",
-            f"Entrer dans {room_name}"
+            f"Entrer dans la {room_name}",
+            f"Entrer dans {room_name}",
+            f"Se rendre à {room_name}"
         ]
 
         for objective in room_objectives:
@@ -200,25 +195,15 @@ class Quest:
             
         Returns:
             bool: True if an objective was completed, False otherwise.
-            
-        Examples:
-        
-        >>> quest = Quest("Talk", "Have a conversation", ["parler avec garde"])
-        >>> quest.check_action_objective("parler", "garde") # doctest: +NORMALIZE_WHITESPACE
-        ✅ Objectif accompli: parler avec garde
-        <BLANKLINE>
-        🏆 Quête terminée: Talk
-        <BLANKLINE>
-        True
-        >>> quest.check_action_objective("courir", "vite")
-        False
         """
         if target:
             objective_variations = [
                 f"{action} {target}",
                 f"{action} avec {target}",
                 f"{action} à {target}",
-                f"{action} la {target}"
+                f"{action} la {target}",
+                f"{action} le {target}",
+                f"{action} un {target}"
             ]
         else:
             objective_variations = [action]
@@ -263,7 +248,6 @@ class QuestManager:
         self.quests = []
         self.player = player
 
-
     def add_quest(self, quest):
         """
         Add a quest to the game.
@@ -291,7 +275,6 @@ class QuestManager:
                 return True
         return False
 
-
     def check_room_objectives(self, room_name):
         """
         Check all active quests for room-related objectives.
@@ -303,7 +286,6 @@ class QuestManager:
             quest.check_room_objective(room_name, self.player)
             if quest.is_completed:
                 self.quests.remove(quest)
-
 
     def check_action_objectives(self, action, target=None):
         """
@@ -318,7 +300,6 @@ class QuestManager:
             if quest.is_completed:
                 self.quests.remove(quest)
 
-
     def get_all_quests(self):
         """
         Get all quests.
@@ -327,7 +308,6 @@ class QuestManager:
             list: List of all quests.
         """
         return self.quests
-
 
     def get_quest_by_title(self, title):
         """
@@ -344,7 +324,6 @@ class QuestManager:
                 return quest
         return None
 
-
     def show_quests(self):
         """
         Display all quests and their status.
@@ -358,17 +337,77 @@ class QuestManager:
             print(f"{quest.get_status()}")
         print()
 
-
-    def show_quest_details(self, quest_title, current_counts=None):
+    def show_quest_details(self, quest_identifier):
         """
         Show detailed information about a specific quest.
         
         Args:
-            quest_title (str): The title of the quest.
-            current_counts (dict): Optional dictionary with current counter values.
+            quest_identifier (str): The number of the quest.
         """
-        quest = self.get_quest_by_title(quest_title)
-        if quest:
-            print(quest.get_details(current_counts))
+        quest = None
+        # Check if identifier is a number
+        if quest_identifier.isdigit():
+            quest_index = int(quest_identifier) - 1  # Convert to 0-based index
+            if 0 <= quest_index < len(self.quests):
+                quest = self.quests[quest_index]
         else:
-            print(f"\nQuête '{quest_title}' non trouvée.\n")
+            # Otherwise, search by title
+            quest = self.get_quest_by_title(quest_identifier)
+
+        if quest:
+            print(quest.get_details())
+        else:
+            print(f"\nQuête '{quest_identifier}' non trouvée.\n")
+
+class DialogueStep:
+    """ This class represents a step in a dialogue. """
+    def __init__(self, description, dialogue=None, choices=None, correct_choices=None, item=None, reward_item=None):
+        
+        self.description = description
+        self.dialogue = dialogue if dialogue is not None else []
+        self.choices = choices if choices is not None else []
+        self.correct_choices = correct_choices if correct_choices is not None else []
+        self.item = item
+        self.reward_item = reward_item
+        self.current_step = 0
+
+    def advance_step(self):
+        """ Advance to the next substep. """
+        if self.current_step < len(self.dialogue) - 1:
+            self.current_step += 1
+            return False
+        return True
+
+    def reset_step(self):
+        """ Reset the substep to the beginning. """
+        self.current_step = 0
+
+    def get_current_response(self):
+        """ 
+        Get the current special response for this substep.
+        Returns:
+            str: The special response for this substep.
+        """
+        if self.current_step < len(self.dialogue):
+            return self.dialogue[self.current_step]
+        return None
+
+    def get_current_choices(self):
+        """
+        Get the current choices for this substep.
+        Returns:
+            list: The choices for this substep.
+        """
+        if self.current_step < len(self.choices):
+            return self.choices[self.current_step]
+        return None
+
+    def get_current_correct_choices(self):
+        """
+        Get the current correct choices for this substep.
+        Returns:
+            list: The correct choices for this substep.
+        """
+        if self.current_step < len(self.correct_choices):
+            return self.correct_choices[self.current_step]
+        return None
