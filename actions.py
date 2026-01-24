@@ -1,13 +1,7 @@
 # Description: The actions module.
+import random
 
-# The actions module contains the functions that are called when a command is executed.
-# Each function takes 3 parameters:
-# - game: the game object
-# - list_of_words: the list of words in the command
-# - number_of_parameters: the number of parameters expected by the command
-# The functions return True if the command was executed successfully, False otherwise.
-# The functions print an error message if the number of parameters is incorrect.
-# The error message is different depending on the number of parameters expected by the command.
+from end_conditions import EndConditions
 
 
 # The error message is stored in the MSG0 and MSG1 variables and formatted with the command_word variable, the first word in the command.
@@ -15,6 +9,7 @@
 MSG0 = "\nLa commande '{command_word}' ne prend pas de paramètre.\n"
 # The MSG1 variable is used when the command takes 1 parameter.
 MSG1 = "\nLa commande '{command_word}' prend 1 seul paramètre.\n"
+
 
 class Actions:
 
@@ -59,6 +54,9 @@ class Actions:
             direction = directions[direction]
             # Move the player in the direction specified by the parameter.
             player.move(direction)
+            # Vérifier les dangers potentiels après le déplacement
+            if not game.finished:  # N'appeler que si la partie n'est pas finie
+                EndConditions.check_defeat_hazards(game)
         else:
             print("\nDirection", direction,"non reconnue")
         return True
@@ -350,6 +348,9 @@ class Actions:
             if character is not None:
                 # Marquer l'objectif "Parler à [character]" comme complété
                 game.player.quest_manager.check_action_objectives("Parler", character.name)
+                # Défaite en parlant à la femme dans la forêt
+                if EndConditions.check_defeat_forest_woman(game, character):
+                    return True
                 if not Actions.check_pnj_quest(game, character):
                     print(character.get_msg())
                     # Gestion générique des outils proposés par un personnage
@@ -399,8 +400,9 @@ class Actions:
         # Vérifie les conditions d'utilisation
         success = Actions.check_condition_outils(game, item_name, localisation, objets_piece, inventaire_items)
         if not success:
-            print(f"\n{item_name} ne vous est pas utile.\n")
-            return False
+            # Utiliser n'importe quel outil au mauvais endroit tue le joueur
+            EndConditions.check_defeat_hazards(game, tool_name=item_name)
+            return True
 
         print(f"\nVous avez utilisé {item_name} avec succès.\n")
         del player.inventory[item_name]

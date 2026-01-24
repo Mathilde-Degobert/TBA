@@ -118,13 +118,49 @@ class Quest:
         return None
 
     def matches_item_objective(self, item_name, objective):
-        """Return True if an obtained item should satisfy the objective text."""
-        name_norm = item_name.lower().replace("-", " ")
-        obj_norm = objective.lower().replace("-", " ")
-        if name_norm in obj_norm:
-            return True
-        tokens = [tok for tok in name_norm.split() if tok]
-        return all(tok in obj_norm for tok in tokens)
+        """Return True if an obtained item should satisfy the objective text.
+        Works similarly to check_room_objective by checking against predefined patterns."""
+        # Normaliser le nom de l'item
+        item_norm = item_name.lower().replace("-", " ")
+        
+        # Créer les variations d'objectifs possibles pour cet item
+        item_objectives = [
+            f"Obtenir {item_name}",
+            f"Obtenir le {item_name}",
+            f"Obtenir la {item_name}",
+            f"Obtenir l'{item_name}",
+            f"Trouver {item_name}",
+            f"Trouver le {item_name}",
+            f"Trouver la {item_name}",
+            f"Trouver l'{item_name}",
+            f"Récupérer {item_name}",
+            f"Récupérer le {item_name}",
+            f"Récupérer la {item_name}",
+            f"Récupérer l'{item_name}",
+            # Versions avec espaces au lieu de tirets
+            f"Obtenir {item_norm}",
+            f"Obtenir le {item_norm}",
+            f"Obtenir la {item_norm}",
+            f"Obtenir l'{item_norm}",
+            f"Trouver {item_norm}",
+            f"Trouver le {item_norm}",
+            f"Trouver la {item_norm}",
+            f"Trouver l'{item_norm}",
+            f"Récupérer {item_norm}",
+            f"Récupérer le {item_norm}",
+            f"Récupérer la {item_norm}",
+            f"Récupérer l'{item_norm}",
+        ]
+        
+        # Normaliser l'objectif pour la comparaison
+        objective_lower = objective.lower()
+        
+        # Vérifier si l'objectif correspond à l'une des variations
+        for item_obj in item_objectives:
+            if item_obj.lower() == objective_lower:
+                return True
+        
+        return False
 
     def check_room_objective(self, room_name, player=None):
         room_objectives = [

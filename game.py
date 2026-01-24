@@ -171,7 +171,7 @@ class Game:
             "Clé à molette": Cle_a_molette
         }
 
-        Regan_Abbot = Character("Regan Abbot", "la fille aînée de la famille Abbot, agée de 16 ans. Elle vous observe avec méfiance.", Maison_étage, 
+        Regan_Abbot = Character("Regan Abbot", "la fille aînée de la famille Abbot, agée de 16 ans. Elle vous observe avec méfiance.", Maison_rez_de_chaussée, 
         ["Bonjour", "Je m'appelle Regan"], can_move=True)
         self.character.append(Regan_Abbot)
         Maison_rez_de_chaussée.characters[Regan_Abbot.name] = Regan_Abbot
@@ -295,9 +295,25 @@ class Game:
         )
 
         dispositif_ultrasons_quest = Quest(
-            title = 
+            title="9 - Construire le dispositif à ultrasons",
+            description="Rassembler tous les matériaux pour construire le dispositif à ultrasons",
+            objectives=[
+                "Obtenir le tournevis"
+                "Obtenir le modulateur",
+                "Obtenir la batterie",
+                "Obtenir les piles",
+                "Obtenir les câbles",
+                "Obtenir le microphone",
+                "Obtenir l'appareil auditif",
+                "Obtenir la carte-mère",
+                "Utiliser le tournevis"
+            ],
+            character = None,
+            dialogue = [],
+            choices =  [],
+            correct_choices = [],
+            reward= self.Dispositif_ultrasons
         )
-
 
         # Add quests to player's quest manager
         self.player.quest_manager.add_quest(key_quest)
@@ -308,7 +324,8 @@ class Game:
         self.player.quest_manager.add_quest(appareil_auditif_quest)
         self.player.quest_manager.add_quest(carte_mere_quest)
         self.player.quest_manager.add_quest(modulateur_quest)
-
+        self.player.quest_manager.add_quest(dispositif_ultrasons_quest)
+    
     def play(self):
         """Play the game."""
         self.setup()
