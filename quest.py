@@ -122,6 +122,7 @@ class Quest:
         Works similarly to check_room_objective by checking against predefined patterns."""
         # Normaliser le nom de l'item
         item_norm = item_name.lower().replace("-", " ")
+        item_orig = item_name.lower()
         
         # Créer les variations d'objectifs possibles pour cet item
         item_objectives = [
@@ -152,12 +153,13 @@ class Quest:
             f"Récupérer l'{item_norm}",
         ]
         
-        # Normaliser l'objectif pour la comparaison
-        objective_lower = objective.lower()
+        # Normaliser l'objectif pour la comparaison (enlever tirets)
+        objective_norm = objective.lower().replace("-", " ")
         
         # Vérifier si l'objectif correspond à l'une des variations
         for item_obj in item_objectives:
-            if item_obj.lower() == objective_lower:
+            item_obj_norm = item_obj.lower().replace("-", " ")
+            if item_obj_norm == objective_norm:
                 return True
         
         return False

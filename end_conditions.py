@@ -79,10 +79,10 @@ class EndConditions:
             EndConditions.trigger_defeat(game, f"Mauvaise utilisation de {tool_name}")
             return True
         
-        # Danger: branches mortes dans le champs - évitable avec la clé à molette
+        # Danger: branches mortes dans le champs - évitable avec le sac de sable
         if room_name == "champs":
-            # Vérifier si le joueur a la clé à molette pour se protéger
-            has_protection = "clé-molette" in game.player.inventory or "clé à molette" in [item.lower() for item in game.player.inventory.keys()]
+            # Vérifier si le joueur a le sac de sable pour se protéger
+            has_protection = "sac-de-sable" in game.player.inventory or "sac de sable" in [item.lower() for item in game.player.inventory.keys()]
             
             if not has_protection:
                 # Sans protection, risque de 40% de déclencher le danger
@@ -98,8 +98,8 @@ class EndConditions:
                     EndConditions.trigger_defeat(game, EndConditions.DEFEAT_DEAD_BRANCHES)
                     return True
             else:
-                # Avec la clé à molette, message rassurant
-                print("\nVous utilisez la clé à molette pour vous frayer un chemin silencieux à travers le champs.")
+                # Avec le sac de sable, message rassurant
+                print("\nVous utilisez le sac de sable pour amortir vos pas et avancer silencieusement à travers le champs.")
                 print("Aucune créature ne vous remarque.\n")
         
         return False

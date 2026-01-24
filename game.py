@@ -124,6 +124,8 @@ class Game:
         Voiture.items[Clés_sous_sol.name] = Clés_sous_sol
         pied_de_biche = Item("pied-de-biche", "Un pied-de-biche solide (outil)", 4.0)
         pont.items[pied_de_biche.name] = pied_de_biche
+        Sac_de_sable = Item("sac-de-sable", "Un sac de sable lourd --> peut amortir le son de vos pas (outil)", 20.0)
+        Sous_sol.items[Sac_de_sable.name] = Sac_de_sable
        
         # Récompenses de quêtes :
             # MATERIAUX
@@ -133,7 +135,7 @@ class Game:
             # OUTILS
         Marteau = Item("marteau", "Un marteau robuste (outil)", 2.5)
         Tournevis = Item("tournevis", "Un tournevis multifonction (outil)", 1.5)
-        Cle_a_molette = Item("clé à molette", "Une clé à molette (outil)", 3.0)
+        Cle_a_molette = Item("clé-à-molette", "Une clé-à-molette (outil)", 3.0)
         Clé_Etage = Item("clé-étage", "la clé menant à l'étage (outil)", 1)
         Dispositif_ultrasons = Item("dispositif", "un dispositif à ultrasons (créé)", 8.0)
         Sous_sol.items[pied_de_biche.name] = pied_de_biche
@@ -168,7 +170,7 @@ class Game:
         Lee_Abbot.tool_choices = {
             "Marteau": Marteau,
             "Tournevis": Tournevis,
-            "Clé à molette": Cle_a_molette
+            "Clé-à-molette": Cle_a_molette
         }
 
         Regan_Abbot = Character("Regan Abbot", "la fille aînée de la famille Abbot, agée de 16 ans. Elle vous observe avec méfiance.", Maison_rez_de_chaussée, 
@@ -195,7 +197,7 @@ class Game:
     def setup_quests(self):
         """Setup the quests for the game."""
         key_quest = Quest(
-            title="1 - Obtenir la clé de l'étage",
+            title="1 - Obtenir la clé-étage",
             description="Parler aux personnages de la famille Abbot vous en apprendra plus sur ce monde",
             objectives=[
                 "Parler à Lee Abbot",
@@ -227,7 +229,7 @@ class Game:
         microphone_quest = Quest(
             title="3 - Trouver le microphone",
             description="Parvenez à entrer à l'étage pour faire une découverte importante",
-            objectives=["Obtenir la clé de l'étage", "Aller à l'étage", "Utiliser la clé de l'étage"],
+            objectives=["Obtenir la clé-étage", "Aller à l'étage", "Utiliser la clé-étage"],
             character = None,
             dialogue = [],
             choices =  [],
@@ -275,7 +277,7 @@ class Game:
         carte_mere_quest = Quest(
             title="7 - Obtenir la carte-mère",
             description="Chercher dans les champs pourrait vous permettre de trouver une carte-mère",
-            objectives=["Obtenir la clé à molette", "Explorer les champs", "Utiliser la clé à molette"],
+            objectives=["Obtenir la clé-à-molette", "Explorer les champs", "Utiliser la clé-à-molette"],
             character = None,
             dialogue = [],
             choices =  [],
