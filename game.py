@@ -137,7 +137,7 @@ class Game:
         Tournevis = Item("tournevis", "Un tournevis multifonction (outil)", 1.5)
         Cle_a_molette = Item("clé-à-molette", "Une clé-à-molette (outil)", 3.0)
         Clé_Etage = Item("clé-étage", "la clé menant à l'étage (outil)", 1)
-        Dispositif_ultrasons = Item("dispositif", "un dispositif à ultrasons (créé)", 8.0)
+        Dispositif_ultrasons = Item("dispositif à ultrasons", "un dispositif à ultrasons (créé)", 8.0)
         Sous_sol.items[pied_de_biche.name] = pied_de_biche
 
         # Rendre accessibles ces outils/récompenses dans setup_quests
@@ -354,6 +354,11 @@ class Game:
         else:
             command = self.commands[command_word]
             command.action(self, list_of_words, command.number_of_parameters)
+        
+        # Vérifier les conditions de victoire après chaque commande
+        from end_conditions import EndConditions
+        if EndConditions.check_victory_conditions(self):
+            EndConditions.trigger_victory(self)
 
     def print_welcome(self):
         """Print the welcome message."""

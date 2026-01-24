@@ -171,20 +171,44 @@ class Quest:
         return False
 
     def check_room_objective(self, room_name, player=None):
+        # Traductions des noms de pièces
+        translations = {
+            "forest": "forêt",
+            "pont": "pont",
+            "magasin": "magasin",
+            "champs": "champs"
+        }
+        
+        # Utiliser la traduction si disponible, sinon utiliser le nom original
+        room_name_fr = translations.get(room_name.lower(), room_name)
+        
         room_objectives = [
             f"Visiter {room_name}",
             f"Visiter le {room_name}",
             f"Visiter la {room_name}",
+            f"Visiter {room_name_fr}",
+            f"Visiter le {room_name_fr}",
+            f"Visiter la {room_name_fr}",
             f"Explorer {room_name}",
             f"Explorer le {room_name}",
             f"Explorer la {room_name}",
+            f"Explorer {room_name_fr}",
+            f"Explorer le {room_name_fr}",
+            f"Explorer la {room_name_fr}",
             f"Aller à {room_name}",
             f"Aller à l'{room_name}" if room_name.startswith("'") else f"Aller à l'{room_name}",
+            f"Aller à {room_name_fr}",
+            f"Aller à l'{room_name_fr}" if room_name_fr.startswith("'") else f"Aller à l'{room_name_fr}",
             f"Entrer dans la {room_name}",
             f"Entrer dans le {room_name}",
+            f"Entrer dans la {room_name_fr}",
+            f"Entrer dans le {room_name_fr}",
             f"Aller dans les {room_name}",
+            f"Aller dans les {room_name_fr}",
             f"Entrer dans {room_name}",
+            f"Entrer dans {room_name_fr}",
             f"Se rendre à {room_name}",
+            f"Se rendre à {room_name_fr}",
         ]
         for objective in room_objectives:
             if self.complete_objective(objective, player):

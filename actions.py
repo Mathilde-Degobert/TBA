@@ -436,7 +436,7 @@ class Actions:
             return False
         # Tournevis au sous-sol avec table et matériaux
         if outil == "tournevis":
-            if localisation == "sous_sol":
+            if localisation == "sous-sol":
                 if "table" in [x.lower() for x in objets_piece]:
                     materiaux_requis = ["modulateur", "batterie", "piles", "câbles", "microphone", "appareil-auditif", "carte-mère"]
                     manquants = [mat for mat in materiaux_requis if mat not in inventaire]

@@ -62,7 +62,7 @@ class Player():
                 # Vérifier si l'obtention de l'objet valide un objectif de quête
                 self.quest_manager.check_item_objectives(reward.name)
                 # Si c'est le dispositif d'ultrasons, retire les matériaux utilisés
-                if reward.name == "dispositif d'ultrasons":
+                if reward.name == "dispositif à ultrasons":
                     materiaux_requis = ["modulateur", "batterie", "piles", "câbles", "microphone", "appareil-auditif", "carte-mère"]
                     for mat in materiaux_requis:
                         if mat in self.inventory:
