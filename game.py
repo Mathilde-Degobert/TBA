@@ -263,7 +263,7 @@ class Game:
         appareil_auditif_quest = Quest(
             title="6 - Obtenir l'appareil auditif",
             description="Parler à Regan pourrait vous aider",
-            objectives=["Parler à Regan", "Aider Regan" ],
+            objectives=["Parler à Regan Abbot", "Aider Regan" ],
             character = "Regan Abbot",
             dialogue = [ 
                 ("Regan Abbot semble préoccupée et vous dit : 'Je ne trouve plus mon appareil auditif. Sans lui, je n'entends rien dans cette maison sombre et silencieuse.'", None),
@@ -277,7 +277,7 @@ class Game:
         carte_mere_quest = Quest(
             title="7 - Obtenir la carte-mère",
             description="Chercher dans les champs pourrait vous permettre de trouver une carte-mère",
-            objectives=["Obtenir la clé-à-molette", "Explorer les champs", "Utiliser la clé-à-molette"],
+            objectives=["Obtenir la clé-à-molette", "Aller dans les champs", "Utiliser la clé-à-molette"],
             character = None,
             dialogue = [],
             choices =  [],

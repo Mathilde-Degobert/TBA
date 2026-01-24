@@ -129,27 +129,33 @@ class Quest:
             f"Obtenir {item_name}",
             f"Obtenir le {item_name}",
             f"Obtenir la {item_name}",
+            f"Obtenir les {item_name}",
             f"Obtenir l'{item_name}",
             f"Trouver {item_name}",
             f"Trouver le {item_name}",
             f"Trouver la {item_name}",
+            f"Trouver les {item_name}",
             f"Trouver l'{item_name}",
             f"Récupérer {item_name}",
             f"Récupérer le {item_name}",
             f"Récupérer la {item_name}",
+            f"Récupérer les {item_name}",
             f"Récupérer l'{item_name}",
             # Versions avec espaces au lieu de tirets
             f"Obtenir {item_norm}",
             f"Obtenir le {item_norm}",
             f"Obtenir la {item_norm}",
+            f"Obtenir les {item_norm}",
             f"Obtenir l'{item_norm}",
             f"Trouver {item_norm}",
             f"Trouver le {item_norm}",
             f"Trouver la {item_norm}",
+            f"Trouver les {item_norm}",
             f"Trouver l'{item_norm}",
             f"Récupérer {item_norm}",
             f"Récupérer le {item_norm}",
             f"Récupérer la {item_norm}",
+            f"Récupérer les {item_norm}",
             f"Récupérer l'{item_norm}",
         ]
         
@@ -167,12 +173,18 @@ class Quest:
     def check_room_objective(self, room_name, player=None):
         room_objectives = [
             f"Visiter {room_name}",
+            f"Visiter le {room_name}",
+            f"Visiter la {room_name}",
             f"Explorer {room_name}",
+            f"Explorer le {room_name}",
+            f"Explorer la {room_name}",
             f"Aller à {room_name}",
             f"Aller à l'{room_name}" if room_name.startswith("'") else f"Aller à l'{room_name}",
             f"Entrer dans la {room_name}",
+            f"Entrer dans le {room_name}",
+            f"Aller dans les {room_name}",
             f"Entrer dans {room_name}",
-            f"Se rendre à {room_name}"
+            f"Se rendre à {room_name}",
         ]
         for objective in room_objectives:
             if self.complete_objective(objective, player):

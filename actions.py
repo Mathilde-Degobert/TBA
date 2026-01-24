@@ -260,6 +260,9 @@ class Actions:
             # Vérifier les objectifs d'action pour la quête (ex: "Trouver le pied de biche")
             game.player.quest_manager.check_action_objectives("Trouver", item_name)
             
+            # Vérifier les objectifs d'obtention (ex: "Obtenir les piles")
+            game.player.quest_manager.check_item_objectives(item_name)
+            
             return True 
 
     def drop(game, list_of_words, number_of_parameters):
@@ -447,6 +450,14 @@ class Actions:
                 print("\nVous devez avoir une table dans la pièce pour utiliser le tournevis au sous-sol.\n")
                 return False
             print("\nVous devez être au sous-sol pour utiliser le tournevis.\n")
+            return False
+        # Clé-à-molette dans les champs
+        if outil == "clé-à-molette":
+            if "champs" in localisation:
+                print("\nVous utilisez la clé-à-molette pour ouvrir un boîtier sur le silo.")
+                print("À l'intérieur, vous trouvez une vieille carte-mère !\n")
+                return True
+            print("\nVous devez être dans les champs pour utiliser la clé-à-molette.\n")
             return False
         return False
 
