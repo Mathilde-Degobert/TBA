@@ -421,12 +421,35 @@ class Actions:
         Affiche des messages d'erreur précis si une condition n'est pas satisfaite.
         Retourne un tuple (bool, Item): (True/False si utilisable, récompense ou None).
         """
-        # Clé à l'étage
+        # Clé-étage: déverrouille l'étage
         if outil == "clé-étage":
-            if "étage" in localisation:
-                print("\nVous avez réussi à ouvrir la porte de l'étage et trouvez un microphone par terre !\n")
-                return True
-            print("\nVous devez être à l'étage pour utiliser la clé.\n")
+            # Chercher la salle étage pour la déverrouiller
+            for room in game.rooms:
+                if room.name == "étage":
+                    if room.locked:
+                        print("\nVous avez utilisé la clé-étage pour ouvrir la porte de l'étage.")
+                        print("Elle s'ouvre avec un long grincement. Vous trouvez un microphone par terre !\n")
+                        room.locked = False
+                        return True
+                    else:
+                        print("\nL'étage est déjà déverrouillé.\n")
+                        return False
+            print("\nVous ne pouvez pas utiliser la clé ici.\n")
+            return False
+        # Clés: déverrouille le sous-sol
+        if outil == "clés":
+            # Chercher la salle sous-sol pour la déverrouiller
+            for room in game.rooms:
+                if room.name == "sous-sol":
+                    if room.locked:
+                        print("\nVous avez utilisé les clés pour ouvrir la grille du sous-sol.")
+                        print("Elle cède dans un grincement métallique. L'accès au sous-sol est maintenant libre !\n")
+                        room.locked = False
+                        return True
+                    else:
+                        print("\nLe sous-sol est déjà déverrouillé.\n")
+                        return False
+            print("\nVous ne pouvez pas utiliser les clés ici.\n")
             return False
         # Pied-de-biche dans la voiture
         if outil == "pied-de-biche":

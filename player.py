@@ -33,6 +33,11 @@ class Player():
             print("\nAucune porte dans cette direction !\n")
             return False
         
+        # Vérifier si la pièce est verrouillée
+        if next_room.locked:
+            print(f"\n{next_room.locked_message}\n")
+            return False
+        
         # Set the current room to the next room.
         self.history.append(self.current_room)
         self.current_room = next_room

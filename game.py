@@ -105,6 +105,12 @@ class Game:
         "U": None, "D": None}
         Sous_sol.exits = {"N" : None , "E" : None, "S" : None, "O" : None, 
         "U": Maison_rez_de_chaussée, "D": None}
+        
+        # Verrouiller l'étage et le sous-sol
+        Maison_étage.locked = True
+        Maison_étage.locked_message = "La porte de l'étage est fermée à clé. Vous avez besoin de la clé-étage pour l'ouvrir."
+        Sous_sol.locked = True
+        Sous_sol.locked_message = "L'escalier du sous-sol est bloqué par une grille rouillée. Vous avez besoin des clés pour y accéder."
       
         # Setup items
         # Items trouvables sur la map
@@ -138,7 +144,6 @@ class Game:
         Cle_a_molette = Item("clé-à-molette", "Une clé-à-molette (outil)", 3.0)
         Clé_Etage = Item("clé-étage", "la clé menant à l'étage (outil)", 1)
         Dispositif_ultrasons = Item("dispositif à ultrasons", "un dispositif à ultrasons (créé)", 8.0)
-        Sous_sol.items[pied_de_biche.name] = pied_de_biche
 
         # Rendre accessibles ces outils/récompenses dans setup_quests
         self.Marteau = Marteau
@@ -189,7 +194,7 @@ class Game:
 
         # Setup player and starting room
         self.player = Player(input("\nEntrez votre nom: "))
-        self.player.current_room = Sous_sol
+        self.player.current_room = pont
 
         # Setup quests
         self.setup_quests()

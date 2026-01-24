@@ -16,6 +16,8 @@ class Room:
         self.exits = {}
         self.items = {}
         self.characters = {}
+        self.locked = False
+        self.locked_message = "La porte est fermée à clé."
     
     # Define the get_exit method.
     def get_exit(self, direction):
