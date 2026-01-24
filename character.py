@@ -20,6 +20,9 @@ class Character():
         self.current_room = current_room
         self.msgs = msgs
         self.can_move = can_move
+        # Optional tool reward handling per character
+        self.tool_choices = None  # dict name -> Item
+        self.given_tools = []  # list of item names already given
 
     def __str__(self):
         return f"{self.name} : {self.description}"

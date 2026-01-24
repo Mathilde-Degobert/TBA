@@ -11,7 +11,6 @@ from item import Item
 from character import Character
 from quest import Quest, QuestManager, DialogueStep
 
-
 class Game:
     """ This class represents the game. """
 
@@ -129,7 +128,7 @@ class Game:
         # Récompenses de quêtes :
             # MATERIAUX
         Microphone = Item("microphone", "Microphone de babyphone (matériau)", 15)
-        Appareil_Auditif = Item("appareil-auditif", "Appareil auditif ancien (matériau)", 8)
+        Appareil_Auditif = Item("appareil-auditif", "Appareil auditif (matériau)", 8)
         Câbles = Item("câbles", "Des câbles électriques (matériau)", 5)
             # OUTILS
         Marteau = Item("marteau", "Un marteau robuste (outil)", 2.5)
@@ -138,6 +137,17 @@ class Game:
         Clé_Etage = Item("clé-étage", "la clé menant à l'étage (outil)", 1)
         Dispositif_ultrasons = Item("dispositif", "un dispositif à ultrasons (créé)", 8.0)
         Sous_sol.items[pied_de_biche.name] = pied_de_biche
+
+        # Rendre accessibles ces outils/récompenses dans setup_quests
+        self.Marteau = Marteau
+        self.Tournevis = Tournevis
+        self.Cle_a_molette = Cle_a_molette
+        self.Cle_Etage = Clé_Etage
+        self.Câbles = Câbles
+        self.Microphone = Microphone
+        self.Appareil_Auditif = Appareil_Auditif
+        self.CarteMere = CarteMere
+        self.Dispositif_ultrasons = Dispositif_ultrasons
 
         # Setup Characters
         Beau_Abbot = Character("Beau Abbot", "Le cadet de la famille Abbot, agé d'a peine 4 ans. Il vous regarde de ses petits yeux innocents.", 
@@ -152,19 +162,24 @@ class Game:
         Maison_étage.characters[Marcus_Abbot.name] = Marcus_Abbot
 
         Lee_Abbot = Character("Lee Abbot", "Le père de famille, un homme d'une quarantaine d'années. Il semble tendu.", Sous_sol, 
-        ["Bonjour", "Je m'appelle Lee"], can_move=True)
+        ["Rebonjour ! Encore Merci pour votre aide. Je peux vous prêter un outil si vous avez besoin. \nLequel de ces outils veux-tu ?"], can_move=True)
         self.character.append(Lee_Abbot)
         Sous_sol.characters[Lee_Abbot.name] = Lee_Abbot
+        Lee_Abbot.tool_choices = {
+            "Marteau": Marteau,
+            "Tournevis": Tournevis,
+            "Clé à molette": Cle_a_molette
+        }
 
         Regan_Abbot = Character("Regan Abbot", "la fille aînée de la famille Abbot, agée de 16 ans. Elle vous observe avec méfiance.", Maison_étage, 
         ["Bonjour", "Je m'appelle Regan"], can_move=True)
         self.character.append(Regan_Abbot)
-        Maison_étage.characters[Regan_Abbot.name] = Regan_Abbot
+        Maison_rez_de_chaussée.characters[Regan_Abbot.name] = Regan_Abbot
 
         Evelyn_Abbot = Character("Evelyn Abbot", "la mère de la famille. Enceinte et très protectrice de ses enfants", Maison_étage, 
         ["Bonjour", "Je m'appelle Evelyn"], can_move=True)
         self.character.append(Evelyn_Abbot)
-        Maison_étage.characters[Evelyn_Abbot.name] = Evelyn_Abbot
+        Magasin.characters[Evelyn_Abbot.name] = Evelyn_Abbot
 
         Femme_dans_la_foret = Character("La femme dans la forêt", "une vieille dame perdue rendue folle par le deuil", forest,["Bonjour", "Je m'appelle... je ne me souviens plus"], can_move=True)
         self.character.append(Femme_dans_la_foret)
@@ -172,7 +187,7 @@ class Game:
 
         # Setup player and starting room
         self.player = Player(input("\nEntrez votre nom: "))
-        self.player.current_room = pont
+        self.player.current_room = Sous_sol
 
         # Setup quests
         self.setup_quests()
@@ -181,15 +196,21 @@ class Game:
         """Setup the quests for the game."""
         key_quest = Quest(
             title="1 - Obtenir la clé de l'étage",
-            description="Parler au personnage de la famille Abbot vous en apprendra plus sur ce monde",
-            objectives=["Parler à Lee Abbot", "Aider le"],
+            description="Parler aux personnages de la famille Abbot vous en apprendra plus sur ce monde",
+            objectives=[
+                "Parler à Lee Abbot",
+                "Aider Lee"
+            ],
             character = "Lee Abbot",
-            dialogue = [ ("Lee Abbott est occupé à installer de l'isolant sur les murs du sous-sol. Il vous aperçoit et vous demande : 'Qu'est-ce que tu veux ?'"),
-            ("Lee Abbott sourit avec soulagement et vous dit : 'C'est gentil ! Tu peux m'aider à tenir les panneaux ? Avec toi, ce sera beaucoup plus facile.'"),
-            ("Vous avez aidé Lee Abbott à installer l'isolant. Après plusieurs heures, le travail est enfin terminé. Il vous remercie chaleureusement et vous dit : 'Installe-toi à l'étage si tu veux. La pièce n'est pas utilisée par la famille. Tu y trouveras refuge.'")],
-            choices =  ["Puis-je vous aider ?", "Pouvez-vous me prêter un outil ?", "Je n'ai besoin de rien."],
-            correct_choices = ["Puis-je vous aider ?"],
-            reward = Item("clé-étage", "la clé menant à l'étage (outil)", 1)
+            dialogue = [ 
+                ("Lee Abbott est occupé à installer de l'isolant sur les murs du sous-sol.\nIl vous aperçoit et vous demande : 'Qu'est-ce que tu veux ?'", None),
+                ("Lee Abbott sourit avec soulagement et vous dit : 'C'est gentil ! Tu peux m'aider à tenir les panneaux ? Avec toi, ce sera beaucoup plus facile.'", "Puis-je vous aider ?"),
+                ("Vous avez aidé Lee Abbott à installer l'isolant. Après plusieurs heures, le travail est enfin terminé.\nIl vous remercie chaleureusement et vous dit : 'Installe-toi à l'étage si tu veux.\nLa pièce n'est pas utilisée par la famille. Tu y trouveras refuge.'", "Puis-je vous aider ?")
+            ],
+            choices =  [["Puis-je vous aider ?", "Que faites-vous ici ?", "Je n'ai besoin de rien." ], [], []],
+            correct_choices = [["Puis-je vous aider ?"], [], []],
+            reward = self.Cle_Etage
+
         )
 
         cables_quest = Quest(
@@ -200,24 +221,93 @@ class Game:
             dialogue = [],
             choices =  [],
             correct_choices = [],
-            reward=Item("câbles", "Câbles récupérés du tableau de bord", 1.0)
+            reward= self.Câbles
         )
 
         microphone_quest = Quest(
             title="3 - Trouver le microphone",
-            description="Parvenir à entrer à l'étage pour faire une découverte importante",
-            objectives=["Obtenir la clé de l'étage", "Aller à l'étage"],
+            description="Parvenez à entrer à l'étage pour faire une découverte importante",
+            objectives=["Obtenir la clé de l'étage", "Aller à l'étage", "Utiliser la clé de l'étage"],
             character = None,
             dialogue = [],
             choices =  [],
             correct_choices = [],
-            reward=Item("microphone", "Microphone trouvé à l'étage", 1.0)
+            reward= self.Microphone
         )
-   #reward = Item("dispositif d'ultrasons", "Dispositif d'ultrasons assemblé", 1.0)
+
+
+        piles_quest = Quest(
+            title="4 - Trouver les piles",
+            description="Explorer le magasin abandonné pourrait vous permettre de trouver des piles",
+            objectives=["Entrer dans le magasin", "Trouver les piles"],
+            character = None,
+            dialogue = [],
+            choices =  [],
+            correct_choices = [],
+            reward= None
+        )
+
+        batterie_quest = Quest(
+            title="5 - Trouver la batterie",
+            description="Chercher sur le pont pourrait vous permettre de trouver une batterie",
+            objectives=["Explorer le pont", "Trouver la batterie"],
+            character = None,
+            dialogue = [],
+            choices =  [],
+            correct_choices = [],
+            reward= None
+        )
+
+        appareil_auditif_quest = Quest(
+            title="6 - Obtenir l'appareil auditif",
+            description="Parler à Regan pourrait vous aider",
+            objectives=["Parler à Regan", "Aider Regan" ],
+            character = "Regan Abbot",
+            dialogue = [ 
+                ("Regan Abbot semble préoccupée et vous dit : 'Je ne trouve plus mon appareil auditif. Sans lui, je n'entends rien dans cette maison sombre et silencieuse.'", None),
+                ("Après avoir cherché avec Regan, vous trouvez son appareil auditif sous un meuble.\nElle vous remercie chaleureusement et vous dit : 'Merci beaucoup ! Tu es vraiment gentil(le).'", "Puis-je vous aider ?")
+            ],
+            choices =  [["Puis-je vous aider ?", "Que faites-vous ici ?", "Je n'ai besoin de rien." ], []],
+            correct_choices = [["Puis-je vous aider ?"], []],
+            reward= self.Appareil_Auditif
+        )
+
+        carte_mere_quest = Quest(
+            title="7 - Obtenir la carte-mère",
+            description="Chercher dans les champs pourrait vous permettre de trouver une carte-mère",
+            objectives=["Obtenir la clé à molette", "Explorer les champs", "Utiliser la clé à molette"],
+            character = None,
+            dialogue = [],
+            choices =  [],
+            correct_choices = [],
+            reward= self.CarteMere
+        )
+
+        modulateur_quest = Quest(
+            title="8 - Trouver le modulateur",
+            description="Chercher dans la forêt pourrait vous permettre de trouver un modulateur",
+            objectives=["Explorer la forêt", "Trouver le modulateur"],
+            character = None,
+            dialogue = [],
+            choices =  [],
+            correct_choices = [],
+            reward= None
+        )
+
+        dispositif_ultrasons_quest = Quest(
+            title = 
+        )
+
+
         # Add quests to player's quest manager
         self.player.quest_manager.add_quest(key_quest)
         self.player.quest_manager.add_quest(cables_quest)
         self.player.quest_manager.add_quest(microphone_quest)
+        self.player.quest_manager.add_quest(piles_quest)
+        self.player.quest_manager.add_quest(batterie_quest)
+        self.player.quest_manager.add_quest(appareil_auditif_quest)
+        self.player.quest_manager.add_quest(carte_mere_quest)
+        self.player.quest_manager.add_quest(modulateur_quest)
 
     def play(self):
         """Play the game."""

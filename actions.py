@@ -239,11 +239,11 @@ class Actions:
             
             # Gérer les choix
             if current_step.get_current_choices():
-                if Actions.handle_choices(current_step, quest_for_item):
+                if Actions.handle_choices(current_step, quest_for_item, game):
                     # Si tous les choix sont corrects, on peut prendre l'item
                     quest_for_item.advance()
                 else:
-                    # Les mauvais choix, on ne prend pas l'item
+                    # Mauvais choix, on ne prend pas l'item
                     print(f"\nVous n'avez pas pris '{item_name}'.\n")
                     return False
             else:
@@ -340,18 +340,25 @@ class Actions:
         
         if len(game.player.current_room.characters) >= 1:
             character_name = list_of_words[1].lower()
-            character = game.player.current_room.get_character(character_name)
+            # Chercher le personnage en comparant les noms en minuscules
+            character = None
+            for char_name, char_obj in game.player.current_room.characters.items():
+                # Chercher si le nom commence par le terme ou si c'est une correspondance partielle
+                if char_name.lower().startswith(character_name) or character_name in char_name.lower():
+                    character = char_obj
+                    break
             if character is not None:
+                # Marquer l'objectif "Parler à [character]" comme complété
+                game.player.quest_manager.check_action_objectives("Parler", character.name)
                 if not Actions.check_pnj_quest(game, character):
                     print(character.get_msg())
+                    # Gestion générique des outils proposés par un personnage
+                    if getattr(character, "tool_choices", None):
+                        Actions.handle_tool_gift(game, character)
             else:
                 print(f"Il n'y a pas de personnage nommé {character_name} dans cette pièce.")
         else:
             print("Il n'y a aucun PNJ dans cette pièce")
-        return True
-
-        # Vérifier les objectifs d'action pour la quête (ex: "Parler à Lee Abbott")
-        game.player.quest_manager.check_action_objectives("Parler", character_found.name)
         return True
 
 #####
@@ -395,7 +402,7 @@ class Actions:
             print(f"\n{item_name} ne vous est pas utile.\n")
             return False
 
-        print(f"\nVous avez utilisé le {item_name} avec succès.\n")
+        print(f"\nVous avez utilisé {item_name} avec succès.\n")
         del player.inventory[item_name]
 
         # Vérifier les objectifs d'action pour la quête (ex: "Utiliser la clé-étage")
@@ -411,7 +418,7 @@ class Actions:
         """
         # Clé à l'étage
         if outil == "clé-étage":
-            if localisation == "etage":
+            if "étage" in localisation:
                 print("\nVous avez réussi à ouvrir la porte de l'étage et trouvez un microphone par terre !\n")
                 return True
             print("\nVous devez être à l'étage pour utiliser la clé.\n")
@@ -510,9 +517,13 @@ class Actions:
         for quest in game.player.quest_manager.quests:
             if quest.character == character_found.name and not quest.is_complete():
                 if game.player.current_room == character_found.current_room:
-                    Actions.handle_dialogue(current_step)
-                    if Actions.handle_choices(current_step, quest):
-                        Actions.advance_dialogue(game, quest)
+                    current_step = quest.get_current_step()
+                    if current_step:
+                        # Réinitialiser le dialogue au début à chaque nouvelle interaction
+                        current_step.reset_step()
+                        Actions.handle_dialogue(current_step)
+                        if Actions.handle_choices(current_step, quest, game):
+                            Actions.advance_dialogue(game, quest)
                     return True
                 l="Vous devez être dans la salle "
                 v = " pour parler à "
@@ -529,43 +540,93 @@ class Actions:
         """
         response = current_step.get_current_response()
         if response:
-            print(response)
+            print(f"\n{response}\n")
+        else:
+            # Si le dialogue est None (condition non remplie), avancer à la prochaine étape
+            if current_step.advance_step():
+                return
+            # Récursivement chercher le prochain dialogue valide
+            Actions.handle_dialogue(current_step)
 
     @staticmethod
-    def handle_choices(current_step, quest):
+    def handle_choices(current_step, quest, game=None):
         """
         Gérer les choix pour une étape de quête donnée.
         Args:
             current_step (QuestStep): L'étape de quête actuelle.
             quest (Quest): La quête actuelle.
+            game (Game): L'objet du jeu (optionnel, pour les récompenses).
         Returns:
             bool: True si le joueur a fait un choix valide, False sinon.
         """
+        # Si le dialogue courant est conditionnel et non satisfait, sauter cette étape
+        if current_step.current_step < len(current_step.dialogue):
+            dlg_item = current_step.dialogue[current_step.current_step]
+            if isinstance(dlg_item, tuple):
+                _, condition = dlg_item
+                if condition is not None and current_step.player_choice != condition:
+                    # Avancer au prochain dialogue/choix valide
+                    if current_step.advance_step():
+                        return True
+                    Actions.handle_dialogue(current_step)
+                    return Actions.handle_choices(current_step, quest, game)
+
         choices = current_step.get_current_choices()
-        if choices:
-            for i, choice in enumerate(choices, 1):
-                print(f"{i}. {choice}")
-            user_choice = input("Choisissez une option: ")
-            try:
-                user_choice = int(user_choice)
-                if 1 <= user_choice <= len(choices):
-                    chosen_option = choices[user_choice - 1]
-                    print(f"Vous avez choisi: {chosen_option}")
-                    correct_choices = current_step.get_current_correct_choices()
-                    if chosen_option in correct_choices:
-                        if current_step.advance_step():
-                            return True
-                        Actions.handle_dialogue(current_step)
-                        return Actions.handle_choices(current_step, quest)
-                    print("Choix incorrect. Vous devez recommencer l'étape.")
-                    current_step.reset_step()  # Réinitialisation de la sous-étape
-                    return False
-                print("Choix invalide.")
+
+        if not choices:
+            # Étape sans choix : on considère cette étape validée
+            return True
+
+        # Si c'est la question des outils, filtrer pour enlever les outils déjà choisis
+        displayed_choices = list(choices)
+        if hasattr(quest, 'tool_choices') and any(tool in choices for tool in quest.tool_choices.keys()):
+            if quest.selected_rewards:
+                # Créer une liste des noms d'outils déjà choisis
+                selected_tool_names = [reward.name for reward in quest.selected_rewards]
+                displayed_choices = [tool for tool in choices if quest.tool_choices.get(tool, None) and quest.tool_choices[tool].name not in selected_tool_names]
+                # Si tous les outils ont été choisis, skip cette étape
+                if not displayed_choices:
+                    return True
+
+        print("─" * 40)
+        for i, choice in enumerate(displayed_choices, 1):
+            print(f" {i}. {choice}")
+        print("─" * 40)
+        user_choice = input("\nChoisissez une option: ")
+        try:
+            user_choice = int(user_choice)
+            if 1 <= user_choice <= len(displayed_choices):
+                chosen_option = displayed_choices[user_choice - 1]
+                print(f"Vous avez choisi: {chosen_option}")
+                correct_choices = current_step.get_current_correct_choices()
+                if chosen_option in correct_choices:
+                    # Enregistrer le choix du joueur pour les conditions de dialogue
+                    current_step.set_player_choice(chosen_option)
+                    
+                    # Marquer les objectifs liés au choix comme complétés
+                    quest.check_dialogue_choice_objective(chosen_option, player=None)
+                    
+                    # Si c'est un choix d'outil, l'ajouter à la liste des récompenses et le donner au joueur
+                    if hasattr(quest, 'tool_choices') and chosen_option in quest.tool_choices:
+                        tool_item = quest.tool_choices[chosen_option]
+                        quest.selected_rewards.append(tool_item)  # Ajouter à la liste au lieu de remplacer
+                        # Donner l'outil au joueur immédiatement
+                        if game and game.player:
+                            game.player.inventory[tool_item.name] = tool_item
+                            print(f"Vous avez obtenu: {tool_item.description}")
+                    
+                    if current_step.advance_step():
+                        return True
+                    Actions.handle_dialogue(current_step)
+                    return Actions.handle_choices(current_step, quest, game)
+                print("Choix incorrect. Vous devez recommencer l'étape.")
+                current_step.reset_step()  # Réinitialisation de la sous-étape
                 return False
-            except ValueError:
-                print("Choix invalide.")
-                return False
-        return False
+            print("Choix invalide.")
+            return False
+        except ValueError:
+            print("Choix invalide.")
+            return False
 
     @staticmethod
     def advance_dialogue(game, quest):
@@ -577,25 +638,48 @@ class Actions:
         """
         current_step = quest.get_current_step()
         if current_step.advance_step():
-            quest.advance()
+            # Si on arrive à la fin du dialogue, donner la récompense principale si définie
+            if game and game.player:
+                quest.grant_reward(game.player)
+            # Étape finale atteinte
             if current_step.reward_item:
                 game.player.inventory[current_step.reward_item.name] = current_step.reward_item
                 print(f"Vous avez reçu {current_step.reward_item.name} comme récompense.")
-            if quest.is_complete() and not quest.name == "La quête principale":
-                print(f"Félicitations, vous avez complété la quête: {quest.name}")
-            else:
-                next_step = quest.get_current_step()
-                if next_step:
-                    next_step.current_step = 0
-                    print(f"Étape suivante: {next_step.description}")
-                    if game.player.current_room == next_step.character.current_room:
-                        Actions.handle_dialogue(next_step)
-                        Actions.handle_choices(next_step, quest)
-                    else:
-                        l = "Vous devez aller dans la salle "
-                        v = " pour continuer la quête."
-                        print(l + next_step.character.current_room.name + v)
-        else:
-            Actions.handle_dialogue(current_step)
-            if not Actions.handle_choices(current_step, quest):
-                print("Vous avez échoué cette étape de la quête. Veuillez réessayer.")
+            if quest.is_complete() and not getattr(quest, 'title', None) == "La quête principale":
+                print(f"Félicitations, vous avez complété la quête: {quest.title}")
+            return
+
+        # Sinon, afficher le dialogue et gérer les choix, puis continuer
+        Actions.handle_dialogue(current_step)
+        if Actions.handle_choices(current_step, quest, game):
+            return Actions.advance_dialogue(game, quest)
+        print("Vous avez échoué cette étape de la quête. Veuillez réessayer.")
+
+    @staticmethod
+    def handle_tool_gift(game, character):
+        """Allow a character to give selectable tools once each."""
+        # Outils déjà donnés
+        given = set(getattr(character, "given_tools", []))
+        available = {
+            name: item for name, item in character.tool_choices.items()
+            if name not in given and name not in game.player.inventory
+        }
+        if not available:
+            return
+        print("─" * 40)
+        tool_names = list(available.keys())
+        for i, name in enumerate(tool_names, 1):
+            print(f" {i}. {name}")
+        print("─" * 40)
+        choice = input("\nChoisissez un outil: ")
+        try:
+            idx = int(choice)
+            if 1 <= idx <= len(tool_names):
+                chosen_name = tool_names[idx - 1]
+                item = available[chosen_name]
+                if game.player.add_reward(item):
+                    character.given_tools.append(chosen_name)
+                return
+            print("Choix invalide.")
+        except ValueError:
+            print("Choix invalide.")

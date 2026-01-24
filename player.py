@@ -59,6 +59,8 @@ class Player():
             if self.check_inventory_space(reward.weight):
                 self.inventory[reward.name] = reward
                 print(f"Vous avez obtenu : {reward.name}\n")
+                # Vérifier si l'obtention de l'objet valide un objectif de quête
+                self.quest_manager.check_item_objectives(reward.name)
                 # Si c'est le dispositif d'ultrasons, retire les matériaux utilisés
                 if reward.name == "dispositif d'ultrasons":
                     materiaux_requis = ["modulateur", "batterie", "piles", "câbles", "microphone", "appareil-auditif", "carte-mère"]
