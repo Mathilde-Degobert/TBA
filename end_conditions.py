@@ -79,27 +79,26 @@ class EndConditions:
             EndConditions.trigger_defeat(game, f"Mauvaise utilisation de {tool_name}")
             return True
         
-        # Danger: branches mortes dans le champs - évitable avec le sac de sable
+        # Danger: branches mortes dans les champs - mort garantie sans sac-de-sable
         if room_name == "champs":
             # Vérifier si le joueur a le sac de sable pour se protéger
             has_protection = "sac-de-sable" in game.player.inventory or "sac de sable" in [item.lower() for item in game.player.inventory.keys()]
             
             if not has_protection:
-                # Sans protection, risque de 40% de déclencher le danger
-                if random.random() < 0.4:
-                    print("\n" + "─" * 60)
-                    print("Vous marchez sans précaution à travers le champs.")
-                    print("Vous marchez sur des branches mortes:")
-                    print("le craquement retentit dans le silence.\n")
-                    print("Au loin, vous entendez des mouvements précipités...")
-                    print("Des créatures approchent, attirées par le bruit.\n")
-                    print("Vous courez, mais elles vous rattrapent...\n")
-                    print("─" * 60 + "\n")
-                    EndConditions.trigger_defeat(game, EndConditions.DEFEAT_DEAD_BRANCHES)
-                    return True
+                # Sans protection, mort garantie
+                print("\n" + "─" * 60)
+                print("Vous entrez dans le champ de maïs.")
+                print("Dès vos premiers pas, vous marchez sur des branches mortes.")
+                print("Le craquement résonne dans le silence...\n")
+                print("Immédiatement, vous entendez des mouvements rapides tout autour.")
+                print("Des créatures surgissent de partout, attirées par le bruit.")
+                print("Vous tentez de fuir, mais il est déjà trop tard...\n")
+                print("─" * 60 + "\n")
+                EndConditions.trigger_defeat(game, EndConditions.DEFEAT_DEAD_BRANCHES)
+                return True
             else:
-                # Avec le sac de sable, message rassurant
-                print("\nVous utilisez le sac de sable pour amortir vos pas et avancer silencieusement à travers le champs.")
+                # Avec le sac de sable, message rassurant (une seule fois)
+                print("\nVous utilisez le sac de sable pour amortir vos pas et avancer silencieusement à travers le champ.")
                 print("Aucune créature ne vous remarque.\n")
         
         return False

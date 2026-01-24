@@ -121,8 +121,6 @@ class Game:
         pont.items[Batterie.name] = Batterie
         Piles = Item("piles", "Boîte de 4 piles (matériau)", 10)
         Magasin.items[Piles.name] = Piles
-        CarteMere = Item("carte-mère", "Carte mère d'ordinateur (matériau)", 25)
-        Champs.items[CarteMere.name] = CarteMere
         Table_bricolage = Item("table", "une table de bricolage avec tous les outils nécessaires", 50000)
         Sous_sol.items[Table_bricolage.name] = Table_bricolage
             # OUTILS
@@ -135,6 +133,7 @@ class Game:
        
         # Récompenses de quêtes :
             # MATERIAUX
+        CarteMere = Item("carte-mère", "Carte mère d'ordinateur (matériau)", 25)
         Microphone = Item("microphone", "Microphone de babyphone (matériau)", 15)
         Appareil_Auditif = Item("appareil-auditif", "Appareil auditif (matériau)", 8)
         Câbles = Item("câbles", "Des câbles électriques (matériau)", 5)

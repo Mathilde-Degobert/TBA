@@ -18,6 +18,8 @@ class Room:
         self.characters = {}
         self.locked = False
         self.locked_message = "La porte est fermée à clé."
+        self.entry_condition = None  # Fonction de vérification pour entrer
+        self.entry_denied_message = "Vous ne pouvez pas entrer ici."
     
     # Define the get_exit method.
     def get_exit(self, direction):
