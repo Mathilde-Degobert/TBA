@@ -133,7 +133,7 @@ class Game:
             # OUTILS
         Marteau = Item("marteau", "Un marteau robuste (outil)", 2.5)
         Tournevis = Item("tournevis", "Un tournevis multifonction (outil)", 1.5)
-        Cle_a_molette = Item("clé-molette", "Une clé à molette (outil)", 3.0)
+        Cle_a_molette = Item("clé à molette", "Une clé à molette (outil)", 3.0)
         Clé_Etage = Item("clé-étage", "la clé menant à l'étage (outil)", 1)
         Dispositif_ultrasons = Item("dispositif", "un dispositif à ultrasons (créé)", 8.0)
         Sous_sol.items[pied_de_biche.name] = pied_de_biche
@@ -298,8 +298,7 @@ class Game:
             title="9 - Construire le dispositif à ultrasons",
             description="Rassembler tous les matériaux pour construire le dispositif à ultrasons",
             objectives=[
-                "Obtenir le tournevis"
-                "Obtenir le modulateur",
+                "Obtenir le tournevis",
                 "Obtenir la batterie",
                 "Obtenir les piles",
                 "Obtenir les câbles",
