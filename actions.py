@@ -1,10 +1,11 @@
 # Description: The actions module.
+""" This module contains the actions that can be performed in the game. """
 import random
 
 from end_conditions import EndConditions
 
-
-# The error message is stored in the MSG0 and MSG1 variables and formatted with the command_word variable, the first word in the command.
+# The error message is stored in the MSG0 and MSG1 variables and formatted
+# with the command_word variable, the first word in the command.
 # The MSG0 variable is used when the command does not take any parameter.
 MSG0 = "\nLa commande '{command_word}' ne prend pas de paramètre.\n"
 # The MSG1 variable is used when the command takes 1 parameter.
@@ -12,6 +13,7 @@ MSG1 = "\nLa commande '{command_word}' prend 1 seul paramètre.\n"
 
 
 class Actions:
+    """ This class contains the actions that can be performed in the game. """
 
     def go(game, list_of_words, number_of_parameters):
         """
@@ -34,19 +36,9 @@ class Actions:
             command_word = list_of_words[0]
             print(MSG1.format(command_word=command_word))
             return False
-            
-            """
-            Handle quests in the game.
-            Args:
-                game (Game): The game object.
-                list_of_words (list): The list of words in the command.
-                number_of_parameters (int): The number of parameters expected by the command.
-            Returns:
-                bool: True if the command was executed successfully, False otherwise.
-            """
-            ...
-        directions = {"NORD": "N" , "N":"N" , "SUD":"S" , "S": "S" , "OUEST":"O" , "O":"O",
-                       "EST":"E" , "E":"E" , "UP": "U" , "U":"U" , "DOWN":"D" , "D":"D"}
+
+        directions = {"NORD": "N", "N": "N", "SUD": "S", "S": "S", "OUEST": "O", "O": "O",
+                       "EST": "E", "E": "E", "UP": "U", "U": "U", "DOWN": "D", "D": "D"}
 
         # Get the direction from the list of words.
         direction = list_of_words[1].upper()
@@ -79,7 +71,7 @@ class Actions:
             command_word = list_of_words[0]
             print(MSG0.format(command_word=command_word))
             return False
-        
+
         # Set the finished attribute of the game object to True.
         player = game.player
         msg = f"\nMerci {player.name} d'avoir joué. Au revoir.\n"
@@ -106,7 +98,7 @@ class Actions:
             command_word = list_of_words[0]
             print(MSG0.format(command_word=command_word))
             return False
-        
+
         # Print the list of available commands.
         print("\nVoici les commandes disponibles:")
         for command in game.commands.values():
@@ -157,7 +149,7 @@ class Actions:
         if not player.history:
             print("\nVous n'avez pas de pièce précédente à laquelle revenir !\n")
             return False
-        
+
         # Set the current room to the last room in the history.
         player.current_room = player.history.pop()
         print(player.current_room.get_long_description())
@@ -215,26 +207,26 @@ class Actions:
         if item_name not in player.current_room.items:
             print(f"\nL'objet '{item_name}' n'est pas dans la pièce.\n")
             return False
-        
+
         # Chercher une quête liée à cet item
         quest_for_item = None
-        for quest in game.quests:
+        for quest in game.player.quest_manager.quests:
             if not quest.is_complete():
                 current_step = quest.get_current_step()
                 if current_step and current_step.reward and current_step.reward.name == item_name:
                     quest_for_item = quest
                     break
-        
+
         # Si une quête est liée à cet item, afficher l'étape de quête
         if quest_for_item:
             current_step = quest_for_item.get_current_step()
             print(f"\n{current_step.description}\n")
-            
+
             # Afficher les réponses de la quête
             response = current_step.get_current_response()
             if response:
                 print(response)
-            
+
             # Gérer les choix
             if current_step.get_current_choices():
                 if Actions.handle_choices(current_step, quest_for_item, game):
@@ -247,23 +239,24 @@ class Actions:
             else:
                 # Pas de choix, juste avancer l'étape
                 quest_for_item.advance()
-        
+
         # Prendre l'item
-        if player.get_weight() + player.current_room.items[item_name].weight > player.max_weight:
-            print(f"\nVous ne pouvez pas prendre '{item_name}' car cela dépasse votre limite de poids.\n")
+        if player.get_weight()\
+            + player.current_room.items[item_name].weight > player.max_weight:
+            print(f"\nVous ne pouvez pas prendre '{item_name}'"
+                  f" car cela dépasse votre limite de poids.\n")
             return False
-        else :
-            item = player.current_room.items.pop(item_name)
-            player.inventory[item_name] = item
-            print(f"\nVous avez pris '{item_name}'.\n")
-            
-            # Vérifier les objectifs d'action pour la quête (ex: "Trouver le pied de biche")
-            game.player.quest_manager.check_action_objectives("Trouver", item_name)
-            
-            # Vérifier les objectifs d'obtention (ex: "Obtenir les piles")
-            game.player.quest_manager.check_item_objectives(item_name)
-            
-            return True 
+        item = player.current_room.items.pop(item_name)
+        player.inventory[item_name] = item
+        print(f"\nVous avez pris '{item_name}'.\n")
+
+        # Vérifier les objectifs d'action pour la quête (ex: "Trouver le pied de biche")
+        game.player.quest_manager.check_action_objectives("Trouver", item_name)
+
+        # Vérifier les objectifs d'obtention (ex: "Obtenir les piles")
+        game.player.quest_manager.check_item_objectives(item_name)
+
+        return True
 
     def drop(game, list_of_words, number_of_parameters):
         """
@@ -288,7 +281,7 @@ class Actions:
         if item_name not in player.inventory:
             print(f"\nL'objet '{item_name}' n'est pas dans votre inventaire.\n")
             return False
-        
+
         # Drop the item from the player's inventory and add it to the current room.
         item = player.inventory.pop(item_name)
         player.current_room.items[item_name] = item
@@ -317,6 +310,17 @@ class Actions:
         return True
 
     def move_pnj(game, list_of_words, number_of_parameters):
+        """
+        Move all non-player characters in the game.
+
+        Args:
+            game (Game): The game object.
+            list_of_words (list): The list of words in the command.
+            number_of_parameters (int): The number of parameters expected by the command.
+
+        Returns:
+            bool: True if the command was executed successfully.
+        """
         for character in game.character:
             character.move()
         return True
@@ -338,14 +342,16 @@ class Actions:
             command_word = list_of_words[0]
             print(MSG1.format(command_word=command_word))
             return False
-        
+
         if len(game.player.current_room.characters) >= 1:
             character_name = list_of_words[1].lower()
             # Chercher le personnage en comparant les noms en minuscules
             character = None
             for char_name, char_obj in game.player.current_room.characters.items():
-                # Chercher si le nom commence par le terme ou si c'est une correspondance partielle
-                if char_name.lower().startswith(character_name) or character_name in char_name.lower():
+                # Chercher si le nom commence par le
+                #terme ou si c'est une correspondance partielle
+                if char_name.lower().startswith(character_name) or \
+                character_name in char_name.lower():
                     character = char_obj
                     break
             if character is not None:
@@ -371,7 +377,8 @@ class Actions:
     def use(game, list_of_words: list, number_of_parameters: int) -> bool:
         """
         Utilise l'outil et accorde la récompense de quête si applicable.
-        Vérifie toutes les conditions d'utilisation, affiche les messages d'erreur, et gère l'ajout de la récompense à l'inventaire ou à la pièce.
+        Vérifie toutes les conditions d'utilisation, affiche les messages d'erreur, 
+        et gère l'ajout de la récompense à l'inventaire ou à la pièce.
         Args:
             game (Game): L'instance du jeu.
             list_of_words (list): Commande utilisateur.
@@ -401,7 +408,8 @@ class Actions:
         inventaire_items = list(inventaire_lower.keys())
 
         # Vérifie les conditions d'utilisation
-        success = Actions.check_condition_outils(game, item_name, localisation, objets_piece, inventaire_items)
+        success = Actions.check_condition_outils(game, item_name, localisation, \
+        objets_piece, inventaire_items)
         if not success:
             # Utiliser n'importe quel outil au mauvais endroit tue le joueur
             EndConditions.check_defeat_hazards(game, tool_name=item_name)
@@ -427,13 +435,14 @@ class Actions:
             for room in game.rooms:
                 if room.name == "étage":
                     if room.locked:
-                        print("\nVous avez utilisé la clé-étage pour ouvrir la porte de l'étage.")
-                        print("Elle s'ouvre avec un long grincement. Vous trouvez un microphone par terre !\n")
+                        print("\nVous avez utilisé la clé-étage pour \
+                        ouvrir la porte de l'étage.")
+                        print("Elle s'ouvre avec un long grincement.\
+                        Vous trouvez un microphone par terre !\n")
                         room.locked = False
                         return True
-                    else:
-                        print("\nL'étage est déjà déverrouillé.\n")
-                        return False
+                    print("\nL'étage est déjà déverrouillé.\n")
+                    return False
             print("\nVous ne pouvez pas utiliser la clé ici.\n")
             return False
         # Clés: déverrouille le sous-sol
@@ -442,26 +451,29 @@ class Actions:
             for room in game.rooms:
                 if room.name == "sous-sol":
                     if room.locked:
-                        print("\nVous avez utilisé les clés pour ouvrir la grille du sous-sol.")
-                        print("Elle cède dans un grincement métallique. L'accès au sous-sol est maintenant libre !\n")
+                        print("\nVous avez utilisé les clés \
+                        pour ouvrir la grille du sous-sol.")
+                        print("Elle cède dans un grincement métallique. \
+                        L'accès au sous-sol est maintenant libre !\n")
                         room.locked = False
                         return True
-                    else:
-                        print("\nLe sous-sol est déjà déverrouillé.\n")
-                        return False
+                    print("\nLe sous-sol est déjà déverrouillé.\n")
+                    return False
             print("\nVous ne pouvez pas utiliser les clés ici.\n")
             return False
         # Pied-de-biche dans la voiture
         if outil == "pied-de-biche":
             if localisation == "voiture":
                 return True
-            print("\nVous devez être dans la voiture pour utiliser le pied-de-biche.\n")
+            print("\nVous devez être dans la voiture \
+            pour utiliser le pied-de-biche.\n")
             return False
         # Tournevis au sous-sol avec table et matériaux
         if outil == "tournevis":
             if localisation == "sous-sol":
                 if "table" in [x.lower() for x in objets_piece]:
-                    materiaux_requis = ["modulateur", "batterie", "piles", "câbles", "microphone", "appareil-auditif", "carte-mère"]
+                    materiaux_requis = ["modulateur", "batterie", "piles", "câbles",\
+                    "microphone", "appareil-auditif", "carte-mère"]
                     manquants = [mat for mat in materiaux_requis if mat not in inventaire]
                     if not manquants:
                         print("\nVous avez fabriqué le dispositif d'ultrasons avec succès !\n")
@@ -470,7 +482,8 @@ class Actions:
                     for mat in manquants:
                         print(f" - {mat}")
                     return False
-                print("\nVous devez avoir une table dans la pièce pour utiliser le tournevis au sous-sol.\n")
+                print("\nVous devez avoir une table dans la pièce pour \
+                utiliser le tournevis au sous-sol.\n")
                 return False
             print("\nVous devez être au sous-sol pour utiliser le tournevis.\n")
             return False
@@ -540,7 +553,8 @@ class Actions:
     @staticmethod
     def check_pnj_quest(game, character_found):
         """
-        Vérifier si le personnage avec lequel le joueur parle est lié à une quête en cours.
+        Vérifier si le personnage avec lequel le joueur 
+        parle est lié à une quête en cours.
         Args:
             game (Game): L'objet du jeu.
             character (Character): Le personnage avec lequel le joueur parle.
@@ -549,7 +563,7 @@ class Actions:
         """
         if character_found is None:
             return False
-        
+
         for quest in game.player.quest_manager.quests:
             if quest.character == character_found.name and not quest.is_complete():
                 if game.player.current_room == character_found.current_room:
@@ -615,11 +629,13 @@ class Actions:
 
         # Si c'est la question des outils, filtrer pour enlever les outils déjà choisis
         displayed_choices = list(choices)
-        if hasattr(quest, 'tool_choices') and any(tool in choices for tool in quest.tool_choices.keys()):
+        if hasattr(quest, 'tool_choices') and \
+        any(tool in choices for tool in quest.tool_choices.keys()):
             if quest.selected_rewards:
                 # Créer une liste des noms d'outils déjà choisis
                 selected_tool_names = [reward.name for reward in quest.selected_rewards]
-                displayed_choices = [tool for tool in choices if quest.tool_choices.get(tool, None) and quest.tool_choices[tool].name not in selected_tool_names]
+                displayed_choices = [tool for tool in choices if quest.tool_choices.get\
+                (tool, None) and quest.tool_choices[tool].name not in selected_tool_names]
                 # Si tous les outils ont été choisis, skip cette étape
                 if not displayed_choices:
                     return True
@@ -636,21 +652,22 @@ class Actions:
                 print(f"Vous avez choisi: {chosen_option}")
                 correct_choices = current_step.get_current_correct_choices()
                 if chosen_option in correct_choices:
-                    # Enregistrer le choix du joueur pour les conditions de dialogue
+                    # Enregistrer le choix du joueur pour les conditions dialogue
                     current_step.set_player_choice(chosen_option)
-                    
+
                     # Marquer les objectifs liés au choix comme complétés
                     quest.check_dialogue_choice_objective(chosen_option, player=None)
-                    
-                    # Si c'est un choix d'outil, l'ajouter à la liste des récompenses et le donner au joueur
-                    if hasattr(quest, 'tool_choices') and chosen_option in quest.tool_choices:
+
+                    # Si c'est un choix d'outil, l'ajouter à la liste des récompenses, le donner
+                    if hasattr(quest, 'tool_choices') and chosen_option \
+                    in quest.tool_choices:
                         tool_item = quest.tool_choices[chosen_option]
-                        quest.selected_rewards.append(tool_item)  # Ajouter à la liste au lieu de remplacer
+                        quest.selected_rewards.append(tool_item)  # Ajouter à la liste
                         # Donner l'outil au joueur immédiatement
                         if game and game.player:
                             game.player.inventory[tool_item.name] = tool_item
                             print(f"Vous avez obtenu: {tool_item.description}")
-                    
+
                     if current_step.advance_step():
                         return True
                     Actions.handle_dialogue(current_step)
@@ -690,6 +707,7 @@ class Actions:
         if Actions.handle_choices(current_step, quest, game):
             return Actions.advance_dialogue(game, quest)
         print("Vous avez échoué cette étape de la quête. Veuillez réessayer.")
+        return False
 
     @staticmethod
     def handle_tool_gift(game, character):

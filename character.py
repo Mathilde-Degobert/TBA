@@ -1,4 +1,5 @@
 # Define the character class
+""" Module for character representation in the game. """
 import random
 from settings import DEBUG
 
@@ -15,6 +16,16 @@ class Character():
 
     # Constructor
     def __init__(self, name: str, description: str, current_room, msgs, can_move=True):
+        """
+        Initialize a character.
+
+        Args:
+            name (str): The name of the character.
+            description (str): A brief description of the character.
+            current_room: The starting room of the character.
+            msgs (list): A list of messages associated with the character.
+            can_move (bool, optional): Whether the character can move. Defaults to True.
+        """
         self.name = name
         self.description = description
         self.current_room = current_room
@@ -35,6 +46,7 @@ class Character():
         return random.choice([True, False])
 #####
     def move(self):
+        """ Move the character to a random adjacent room."""
         if not self.can_move:
             return False
         exits = [room for room in self.current_room.exits.values() if room is not None  ]
@@ -47,7 +59,7 @@ class Character():
         if DEBUG:
             print(f"DEBUG : {self.name} se déplace vers {next_room.name}")
         return True
-        
+
     def get_msg(self):
         """ Display the next message of the character
         Returns:
@@ -56,4 +68,3 @@ class Character():
         msg = self.msgs.pop(0) if self.msgs else None
         self.msgs.append(msg)
         return msg
-    
