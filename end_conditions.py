@@ -1,7 +1,6 @@
 """
 Module de gestion des conditions de fin de jeu (victoire et défaite).
 """
-import random
 
 class EndConditions:
     """Gère les conditions de fin de partie."""
@@ -97,11 +96,10 @@ class EndConditions:
                 print("─" * 60 + "\n")
                 EndConditions.trigger_defeat(game, EndConditions.DEFEAT_DEAD_BRANCHES)
                 return True
-            else:
-                # Avec le sac de sable, message rassurant (une seule fois)
-                print("\nVous utilisez le sac de sable pour amortir\
-                vos pas et avancer silencieusement à travers le champ.")
-                print("Aucune créature ne vous remarque.\n")
+            # Avec le sac de sable, message rassurant (une seule fois)
+            print("\nVous utilisez le sac de sable pour amortir")
+            print("vos pas et avancer silencieusement à travers le champ.")
+            print("Aucune créature ne vous remarque.\n")
 
         return False
 

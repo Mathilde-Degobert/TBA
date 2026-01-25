@@ -1,7 +1,5 @@
 # Description: The actions module.
 """ This module contains the actions that can be performed in the game. """
-import random
-
 from end_conditions import EndConditions
 
 # The error message is stored in the MSG0 and MSG1 variables and formatted
@@ -15,6 +13,7 @@ MSG1 = "\nLa commande '{command_word}' prend 1 seul paramètre.\n"
 class Actions:
     """ This class contains the actions that can be performed in the game. """
 
+    @staticmethod
     def go(game, list_of_words, number_of_parameters):
         """
         Move the player in the direction specified by the parameter.
@@ -53,6 +52,7 @@ class Actions:
             print("\nDirection", direction,"non reconnue")
         return True
 
+    @staticmethod
     def quit(game, list_of_words, number_of_parameters):
         """
         Quit the game.
@@ -79,6 +79,7 @@ class Actions:
         game.finished = True
         return True
 
+    @staticmethod
     def help(game, list_of_words, number_of_parameters):
         """
         Print the list of available commands.
@@ -106,6 +107,7 @@ class Actions:
         print()
         return True
 
+    @staticmethod
     def history(game, list_of_words, number_of_parameters):
         """
         gets the history of rooms visited by the player.
@@ -126,6 +128,7 @@ class Actions:
         player.get_history()
         return True
 
+    @staticmethod
     def go_back(game, list_of_words, number_of_parameters):
         """
         goes back to the last place visited by the player.
@@ -156,6 +159,7 @@ class Actions:
         player.get_history()
         return True
 
+    @staticmethod
     def look(game, list_of_words, number_of_parameters):
         """
         looks around the current room.
@@ -184,6 +188,7 @@ class Actions:
                 print(f"- {character.name} : {character.description}")
         return True
 
+    @staticmethod
     def take(game, list_of_words, number_of_parameters):
         """
         takes an item from the current room and adds it to the player's inventory.
@@ -213,7 +218,8 @@ class Actions:
         for quest in game.player.quest_manager.quests:
             if not quest.is_complete():
                 current_step = quest.get_current_step()
-                if current_step and current_step.reward and current_step.reward.name == item_name:
+                if (current_step and current_step.reward_item and
+                        current_step.reward_item.name == item_name):
                     quest_for_item = quest
                     break
 
@@ -258,6 +264,7 @@ class Actions:
 
         return True
 
+    @staticmethod
     def drop(game, list_of_words, number_of_parameters):
         """
         drops an item from the player's inventory and adds it to the current room.
@@ -288,6 +295,7 @@ class Actions:
         print(f"\nVous avez déposé '{item_name}'.\n")
         return True
 
+    @staticmethod
     def check(game, list_of_words, number_of_parameters):
         """
         checks the player's inventory.
@@ -309,14 +317,15 @@ class Actions:
         player.get_inventory()
         return True
 
+    @staticmethod
     def move_pnj(game, list_of_words, number_of_parameters):
         """
         Move all non-player characters in the game.
 
         Args:
             game (Game): The game object.
-            list_of_words (list): The list of words in the command.
-            number_of_parameters (int): The number of parameters expected by the command.
+            list_of_words (list): The list of words in the command (unused).
+            number_of_parameters (int): The number of parameters (unused).
 
         Returns:
             bool: True if the command was executed successfully.
@@ -325,6 +334,7 @@ class Actions:
             character.move()
         return True
 
+    @staticmethod
     def talk(game, list_of_words, number_of_parameters):
         """
         Talk to a character in the current room.

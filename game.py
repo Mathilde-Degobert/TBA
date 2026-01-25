@@ -2,14 +2,14 @@
 """ This module contains the Game class which represents the game. """
 # Import modules
 
-from settings import DEBUG
 from room import Room
 from player import Player
 from command import Command
 from actions import Actions
 from item import Item
 from character import Character
-from quest import Quest, QuestManager, DialogueStep
+from quest import Quest
+from end_conditions import EndConditions
 
 class Game:
     """ This class represents the game. """
@@ -106,7 +106,7 @@ class Game:
         Magasin.exits = {"N" : None, "E" : pont, "S" : None, "O" : None, "U": None, "D": None }
         Champs.exits = {"N" : None, "E" : None, "S" : None, "O" : Maison_rez_de_chaussée,
         "U": None, "D": None}
-        Maison_rez_de_chaussée.exits = {"N" : forest, "E" : None, "S" : Voiture, "O" : None,
+        Maison_rez_de_chaussée.exits = {"N" : forest, "E" : None, "S" : Voiture, "O" : Champs,
         "U": Maison_étage, "D": Sous_sol}
         Maison_étage.exits = {"N" : None, "E" : None, "S" : None, "O" : None, "U": None,
         "D": Maison_rez_de_chaussée}
@@ -402,7 +402,6 @@ class Game:
             command.action(self, list_of_words, command.number_of_parameters)
 
         # Vérifier les conditions de victoire après chaque commande
-        from end_conditions import EndConditions
         if EndConditions.check_victory_conditions(self):
             EndConditions.trigger_victory(self)
 

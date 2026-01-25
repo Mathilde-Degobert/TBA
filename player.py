@@ -57,7 +57,7 @@ class Player():
     def add_reward(self, reward):
         """
         Add a reward to the player's inventory.
-       
+
         Args:
             reward (str): The reward to add.
         """
@@ -75,34 +75,31 @@ class Player():
                         if mat in self.inventory:
                             del self.inventory[mat]
                 return True
-            else:
-                current_room.items[reward.name] = reward
-                print(f"\nVotre inventaire est trop plein pour {reward.name}.\
-                L'objet a été déposé dans la pièce.\n")
-                return False
+            print(f"\nVotre inventaire est trop plein pour {reward.name}.")
+            print("L'objet a été déposé dans la pièce.\n")
+            self.current_room.items[reward.name] = reward
+            return False
 
     # Define the history method.
     def get_history(self):
         """Display the player's visited rooms history."""
-        if self.history == []:
+        if not self.history:
             print("\nVous n'avez pas encore visité de pièces.\n")
             return False
-
-        else :
-            print("\nVous avez déjà visité les lieux suivants :")
-            for room in self.history:
-                print(f"- {room.name}")
+        print("\nVous avez déjà visité les lieux suivants :")
+        for room in self.history:
+            print(f"- {room.name}")
+        return True
 
     def get_inventory(self):
         """Display the player's inventory."""
-        if not self.inventory :
+        if not self.inventory:
             print("\nVotre inventaire est vide.\n")
             return False
-
-        else :
-            print("\nVotre inventaire contient :")
-            for item_name, item in self.inventory.items():
-                    print(f"- {item}")
+        print("\nVotre inventaire contient :")
+        for item in self.inventory.values():
+            print(f"- {item}")
+        return True
 
     def get_weight(self):
         """Return the total weight of items in the player's inventory (in kg)."""

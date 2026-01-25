@@ -27,21 +27,20 @@ class Room:
         """ Get the exit in the given direction.
         Args:
             direction (str): The direction of the exit.
-        Returns:     
+        Returns:
             Room: The room in the given direction."""
         # Return the room in the given direction if it exists.
         if direction in self.exits.keys():
             return self.exits[direction]
-        else:
-            return None
+        return None
 
     # Return a string describing the room's exits.
     def get_exit_string(self):
         """ Returns a string describing the room's exits."""
         exit_string = "Sorties: "
-        for exit in self.exits.keys():
-            if self.exits.get(exit) is not None:
-                exit_string += exit + ", "
+        for exit_dir in self.exits:
+            if self.exits.get(exit_dir) is not None:
+                exit_string += exit_dir + ", "
         exit_string = exit_string.strip(", ")
         return exit_string
 
@@ -59,9 +58,7 @@ class Room:
         if not self.items:
             print("\nIl n'y a rien ici.\n")
             return False
-
-        else:
-            print("\nLa pièce contient :")
-            for item_name, item in self.items.items():
-                print(f"- {item}")
-            return True
+        print("\nLa pièce contient :")
+        for item in self.items.values():
+            print(f"- {item}")
+        return True

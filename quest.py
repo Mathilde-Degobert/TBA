@@ -6,10 +6,9 @@ class Quest:
     description, objectives, completion status, and optional rewards.
     """
 
-    def __init__(self, title, description, objectives=None, character=None, dialogue=None, choices=None, correct_choices=None, reward=None):
-        """
-        Initialize a new quest.
-        """
+    def __init__(self, title, description, objectives=None, character=None,
+                 dialogue=None, choices=None, correct_choices=None, reward=None):
+        """Initialize a new quest."""
         self.title = title
         self.description = description
         self.objectives = objectives if objectives is not None else []
@@ -129,7 +128,6 @@ class Quest:
         Works similarly to check_room_objective by checking against predefined patterns."""
         # Normaliser le nom de l'item
         item_norm = item_name.lower().replace("-", " ")
-        item_orig = item_name.lower()
 
         # Créer les variations d'objectifs possibles pour cet item
         item_objectives = [
@@ -377,7 +375,9 @@ class QuestManager:
 class DialogueStep:
     """This class represents a step in a dialogue."""
 
-    def __init__(self, description, dialogue=None, choices=None, correct_choices=None, item=None, reward_item=None):
+    def __init__(self, description, dialogue=None, choices=None,
+                 correct_choices=None, item=None, reward_item=None):
+        """Initialize a dialogue step."""
         self.description = description
         self.dialogue = dialogue if dialogue is not None else []
         self.choices = choices if choices is not None else []
@@ -418,11 +418,8 @@ class DialogueStep:
                 # Vérifier la condition
                 if condition is None or self.player_choice == condition:
                     return text
-                else:
-                    # Condition non remplie, sauter cette étape
-                    return None
-            else:
-                # Simple string sans condition
+                # Condition non remplie, sauter cette étape
+                return None
                 return dialogue_item
         return None
 
