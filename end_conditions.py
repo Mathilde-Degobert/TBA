@@ -1,6 +1,7 @@
 """
 Module de gestion des conditions de fin de jeu (victoire et défaite).
 """
+import random
 
 class EndConditions:
     """Gère les conditions de fin de partie."""
@@ -59,13 +60,12 @@ class EndConditions:
         Returns:
             bool: True si défaite déclenchée, False sinon.
         """
-        import random
         current_room = game.player.current_room
         if not current_room:
             return False
-        
+
         room_name = current_room.name.lower()
-        
+
         # Si un outil est fourni, afficher un message dramatique
         if tool_name:
             print("\n" + "─" * 60)
@@ -78,12 +78,13 @@ class EndConditions:
             print("─" * 60 + "\n")
             EndConditions.trigger_defeat(game, f"Mauvaise utilisation de {tool_name}")
             return True
-        
+
         # Danger: branches mortes dans les champs - mort garantie sans sac-de-sable
         if room_name == "champs":
             # Vérifier si le joueur a le sac de sable pour se protéger
-            has_protection = "sac-de-sable" in game.player.inventory or "sac de sable" in [item.lower() for item in game.player.inventory.keys()]
-            
+            has_protection = "sac-de-sable" in game.player.inventory \
+            or "sac de sable" in [item.lower() for item in game.player.inventory.keys()]
+
             if not has_protection:
                 # Sans protection, mort garantie
                 print("\n" + "─" * 60)
@@ -98,9 +99,10 @@ class EndConditions:
                 return True
             else:
                 # Avec le sac de sable, message rassurant (une seule fois)
-                print("\nVous utilisez le sac de sable pour amortir vos pas et avancer silencieusement à travers le champ.")
+                print("\nVous utilisez le sac de sable pour amortir\
+                vos pas et avancer silencieusement à travers le champ.")
                 print("Aucune créature ne vous remarque.\n")
-        
+
         return False
 
     @staticmethod
@@ -114,7 +116,7 @@ class EndConditions:
         """
         # Victoire: avoir le dispositif à ultrasons dans l'inventaire
         player_items = [item.lower() for item in game.player.inventory.keys()]
-        
+
         if "dispositif à ultrasons" in player_items or "dispositif-à-ultrasons" in player_items:
             return True
         return False
