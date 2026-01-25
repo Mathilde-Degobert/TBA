@@ -445,10 +445,10 @@ class Actions:
             for room in game.rooms:
                 if room.name == "étage":
                     if room.locked:
-                        print("\nVous avez utilisé la clé-étage pour \
-                        ouvrir la porte de l'étage.")
-                        print("Elle s'ouvre avec un long grincement.\
-                        Vous trouvez un microphone par terre !\n")
+                        print("\nVous avez utilisé la clé-étage pour"
+                              " ouvrir la porte de l'étage.")
+                        print("Elle s'ouvre avec un long grincement."
+                              " Vous trouvez un microphone par terre !\n")
                         room.locked = False
                         return True
                     print("\nL'étage est déjà déverrouillé.\n")
@@ -461,10 +461,10 @@ class Actions:
             for room in game.rooms:
                 if room.name == "sous-sol":
                     if room.locked:
-                        print("\nVous avez utilisé les clés \
-                        pour ouvrir la grille du sous-sol.")
-                        print("Elle cède dans un grincement métallique. \
-                        L'accès au sous-sol est maintenant libre !\n")
+                        print("\nVous avez utilisé les clés"
+                              " pour ouvrir la grille du sous-sol.")
+                        print("Elle cède dans un grincement métallique."
+                              " L'accès au sous-sol est maintenant libre !\n")
                         room.locked = False
                         return True
                     print("\nLe sous-sol est déjà déverrouillé.\n")
@@ -475,8 +475,8 @@ class Actions:
         if outil == "pied-de-biche":
             if localisation == "voiture":
                 return True
-            print("\nVous devez être dans la voiture \
-            pour utiliser le pied-de-biche.\n")
+            print("\nVous devez être dans la voiture"
+                  " pour utiliser le pied-de-biche.\n")
             return False
         # Tournevis au sous-sol avec table et matériaux
         if outil == "tournevis":
@@ -492,8 +492,8 @@ class Actions:
                     for mat in manquants:
                         print(f" - {mat}")
                     return False
-                print("\nVous devez avoir une table dans la pièce pour \
-                utiliser le tournevis au sous-sol.\n")
+                print("\nVous devez avoir une table dans la pièce pour"
+                      " utiliser le tournevis au sous-sol.\n")
                 return False
             print("\nVous devez être au sous-sol pour utiliser le tournevis.\n")
             return False

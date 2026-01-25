@@ -33,11 +33,11 @@ class Game:
         self.commands["help"] = help
         quit = Command("quit", " : quitter le jeu", Actions.quit, 0)
         self.commands["quit"] = quit
-        go = Command("go", " <direction> : se déplacer dans une direction cardinale \
-        (N, E, S, O, U, D)", Actions.go, 1)
+        go = Command("go", " <direction> : se déplacer dans une direction cardinale"
+                            " (N, E, S, O, U, D)", Actions.go, 1)
         self.commands["go"] = go
-        history = Command("history", " : afficher l'historique des pièces visitées",\
-        Actions.history, 0)
+        history = Command("history", " : afficher l'historique des pièces visitées",
+                         Actions.history, 0)
         self.commands["history"] = history
         back = Command("back", " : revenir au lieu précédent", Actions.go_back, 0)
         self.commands["back"] = back
@@ -45,8 +45,8 @@ class Game:
         self.commands["look"] = look
         take = Command("take", " <item> : prendre un objet", Actions.take, 1)
         self.commands["take"] = take
-        drop = Command("drop", " <item> : déposer un objet de l'inventaire \
-        dans la pièce", Actions.drop, 1)
+        drop = Command("drop", " <item> : déposer un objet de l'inventaire"
+                              " dans la pièce", Actions.drop, 1)
         self.commands["drop"] = drop
         check = Command("check", " : afficher le contenu de l'inventaire", Actions.check, 0)
         self.commands["check"] = check
@@ -56,8 +56,8 @@ class Game:
         self.commands["use"] = use
         quests = Command("quests", " : afficher la liste de toutes les quêtes", Actions.quests, 0)
         self.commands["quests"] = quests
-        quest = Command("quest", " <nom> : afficher l'avancement d'une quête \
-        spécifique", Actions.quest, 1)
+        quest = Command("quest", " <nom> : afficher l'avancement d'une quête"
+                               " spécifique", Actions.quest, 1)
         self.commands["quest"] = quest
 
 
@@ -117,11 +117,12 @@ class Game:
 
         # Verrouiller l'étage et le sous-sol
         Maison_étage.locked = True
-        Maison_étage.locked_message = "La porte de l'étage est fermée à clé.\
-        Vous avez besoin de la clé-étage pour l'ouvrir."
+        Maison_étage.locked_message = ("La porte de l'étage est fermée à clé."
+                                       " Vous avez besoin de la clé-étage pour l'ouvrir.")
         Sous_sol.locked = True
-        Sous_sol.locked_message = "L'escalier du sous-sol est bloqué\
-        par une grille rouillée. Vous avez besoin des clés pour y accéder."
+        Sous_sol.locked_message = ("L'escalier du sous-sol est bloqué"
+                                   " par une grille rouillée. Vous avez"
+                                   " besoin des clés pour y accéder.")
 
         # Setup items
         # Items trouvables sur la map
@@ -132,8 +133,8 @@ class Game:
         pont.items[Batterie.name] = Batterie
         Piles = Item("piles", "Boîte de 4 piles (matériau)", 10)
         Magasin.items[Piles.name] = Piles
-        Table_bricolage = Item("table", "une table de bricolage avec \
-        tous les outils nécessaires", 50000)
+        Table_bricolage = Item("table", "une table de bricolage avec"
+                                        " tous les outils nécessaires", 50000)
         Sous_sol.items[Table_bricolage.name] = Table_bricolage
             # OUTILS
         Clés_sous_sol = Item("clés", "les clés menant au sous-sol", 1)
@@ -141,8 +142,8 @@ class Game:
         pied_de_biche = Item("pied-de-biche", "Un pied-de-biche solide (outil)",
         4.0)
         pont.items[pied_de_biche.name] = pied_de_biche
-        Sac_de_sable = Item("sac-de-sable", "Un sac de sable lourd --> peut \
-        amortir le son de vos pas (outil)", 20.0)
+        Sac_de_sable = Item("sac-de-sable", "Un sac de sable lourd --> peut"
+                                           " amortir le son de vos pas (outil)", 20.0)
         Sous_sol.items[Sac_de_sable.name] = Sac_de_sable
 
         # Récompenses de quêtes :
@@ -171,23 +172,25 @@ class Game:
         self.Dispositif_ultrasons = Dispositif_ultrasons
 
         # Setup Characters
-        Beau_Abbot = Character("Beau Abbot","Le cadet de la famille Abbot,\
-        agé d'a peine 4 ans. Il vous regarde de ses petits yeux innocents.",
+        Beau_Abbot = Character("Beau Abbot", "Le cadet de la famille Abbot,"
+                                             " agé d'a peine 4 ans. Il vous regarde"
+                                             " de ses petits yeux innocents.",
         Maison_rez_de_chaussée,
         ["Bonjour...", "J'ai vu un monstre dehors... mais il dormait.'"],can_move=True)
         self.character.append(Beau_Abbot)
         Maison_rez_de_chaussée.characters[Beau_Abbot.name] = Beau_Abbot
 
-        Marcus_Abbot = Character("Marcus Abbot", "Le deuxième fils de la famille Abbot,\
-        agé de 12 ans. Il fuit votre regard, apeuré.", Maison_étage,
+        Marcus_Abbot = Character("Marcus Abbot", "Le deuxième fils de la famille Abbot,"
+                                                 " agé de 12 ans. Il fuit votre regard, apeuré.",
+                                                  Maison_étage,
         ["...Moins de bruit.", "Ils entendent tout. Même nos pas."], can_move=True)
         self.character.append(Marcus_Abbot)
         Maison_étage.characters[Marcus_Abbot.name] = Marcus_Abbot
 
-        Lee_Abbot = Character("Lee Abbot", "Le père de famille, un homme d'une quarantaine\
-        d'années. Il semble tendu.", Sous_sol,
-        ["Rebonjour ! Encore Merci pour votre aide. Je peux vous prêter un outil\
-         si vous avez besoin. \nLequel de ces outils veux-tu ?"], can_move=True)
+        Lee_Abbot = Character("Lee Abbot", "Le père de famille, un homme d'une quarantaine"
+                                          " d'années. Il semble tendu.", Sous_sol,
+        ["Rebonjour ! Encore Merci pour votre aide. Je peux vous prêter un outil"
+         " si vous avez besoin. \nLequel de ces outils veux-tu ?"], can_move=True)
         self.character.append(Lee_Abbot)
         Sous_sol.characters[Lee_Abbot.name] = Lee_Abbot
         Lee_Abbot.tool_choices = {
@@ -196,14 +199,16 @@ class Game:
             "Clé-à-molette": Cle_a_molette
         }
 
-        Regan_Abbot = Character("Regan Abbot", "la fille aînée de la famille Abbot,\
-         agée de 16 ans. Elle vous observe avec méfiance.", Maison_rez_de_chaussée,
+        Regan_Abbot = Character("Regan Abbot", "la fille aînée de la famille Abbot,"
+                                              " agée de 16 ans. Elle vous observe avec méfiance.",
+                                                Maison_rez_de_chaussée,
         ["Ne le pers pas... c'est rare.", "Fais attention à toi."], can_move=True)
         self.character.append(Regan_Abbot)
         Maison_rez_de_chaussée.characters[Regan_Abbot.name] = Regan_Abbot
 
-        Evelyn_Abbot = Character("Evelyn Abbot", "la mère de la famille.\
-        Enceinte et très protectrice de ses enfants", Magasin,
+        Evelyn_Abbot = Character("Evelyn Abbot", "la mère de la famille."
+                                                " Enceinte et très protectrice de ses enfants",
+                                                 Magasin,
         ["Chut... fais attention où tu mets les pieds.",
         "Je fouille depuis des heures... il reste presque plus rien."], can_move=True)
         self.character.append(Evelyn_Abbot)
@@ -226,23 +231,23 @@ class Game:
         """Setup the quests for the game."""
         key_quest = Quest(
             title="1 - Obtenir la clé-étage",
-            description="Parler aux personnages de la famille Abbot\
-            vous en apprendra plus sur ce monde",
+            description="Parler aux personnages de la famille Abbot"
+                       " vous en apprendra plus sur ce monde",
             objectives=[
                 "Parler à Lee Abbot",
                 "Aider Lee"
             ],
             character = "Lee Abbot",
             dialogue = [
-                ("Lee Abbott est occupé à installer de l'isolant sur les murs du sous-sol.\n \
-                Il vous aperçoit et vous demande :'Qu'est-ce que tu veux ?'", None),
-                ("Lee Abbott sourit avec soulagement et vous dit : 'C'est gentil !\
-                Tu peux m'aider à tenir les panneaux ? Avec toi, ce sera beaucoup plus facile.'",
+                ("Lee Abbott est occupé à installer de l'isolant sur les murs du sous-sol.\n"
+                " Il vous aperçoit et vous demande :'Qu'est-ce que tu veux ?'", None),
+                ("Lee Abbott sourit avec soulagement et vous dit : 'C'est gentil !"
+                " Tu peux m'aider à tenir les panneaux ? Avec toi, ce sera beaucoup plus facile.'",
                 "Puis-je vous aider ?"),
-                ("Vous avez aidé Lee Abbott à installer l'isolant. Après plusieurs heures,\
-                le travail est enfin terminé.\nIl vous remercie chaleureusement et vous dit :\
-                'Installe-toi à l'étage si tu veux.\nLa pièce n'est pas utilisée par la famille.\
-                Tu y trouveras refuge.'", "Puis-je vous aider ?")
+                ("Vous avez aidé Lee Abbott à installer l'isolant. Après plusieurs heures,"
+                " le travail est enfin terminé.\nIl vous remercie chaleureusement et vous dit :"
+                " 'Installe-toi à l'étage si tu veux.\nLa pièce n'est pas utilisée par la famille."
+                " Tu y trouveras refuge.'", "Puis-je vous aider ?")
             ],
             choices =  [["Puis-je vous aider ?", "Que faites-vous ici ?",
             "Je n'ai besoin de rien." ], [], []],
@@ -277,8 +282,8 @@ class Game:
 
         piles_quest = Quest(
             title="4 - Trouver les piles",
-            description="Explorer le magasin abandonné pourrait vous permettre\
-            de trouver des piles",
+            description="Explorer le magasin abandonné pourrait vous permettre"
+                       " de trouver des piles",
             objectives=["Entrer dans le magasin", "Trouver les piles"],
             character = None,
             dialogue = [],
@@ -289,8 +294,8 @@ class Game:
 
         batterie_quest = Quest(
             title="5 - Trouver la batterie",
-            description="Chercher sur le pont pourrait vous permettre\
-            de trouver une batterie",
+            description="Chercher sur le pont pourrait vous permettre"
+                       " de trouver une batterie",
             objectives=["Explorer le pont", "Trouver la batterie"],
             character = None,
             dialogue = [],
@@ -305,12 +310,12 @@ class Game:
             objectives=["Parler à Regan Abbot", "Aider Regan" ],
             character = "Regan Abbot",
             dialogue = [
-                ("Regan Abbot semble préoccupée et vous dit :'Je ne trouve plus mon appareil\
-                auditif. Sans lui, je n'entends rien dans cette maison sombre et silencieuse.'",
+                ("Regan Abbot semble préoccupée et vous dit :'Je ne trouve plus mon appareil"
+                " auditif. Sans lui, je n'entends rien dans cette maison sombre et silencieuse.'",
                 None),
-                ("Après avoir cherché avec Regan, vous trouvez son appareil auditif sous un \
-                meuble.\nElle vous remercie chaleureusement et vous dit : 'Merci beaucoup !\
-                Tu es vraiment gentil(le).'", "Puis-je vous aider ?")
+                ("Après avoir cherché avec Regan, vous trouvez son appareil auditif sous un"
+                " meuble.\nElle vous remercie chaleureusement et vous dit : 'Merci beaucoup !"
+                " Tu es vraiment gentil(le).'", "Puis-je vous aider ?")
             ],
             choices =  [["Puis-je vous aider ?", "Que faites-vous ici ?",
             "Je n'ai besoin de rien." ], []],
@@ -320,8 +325,8 @@ class Game:
 
         carte_mere_quest = Quest(
             title="7 - Obtenir la carte-mère",
-            description="Chercher dans les champs pourrait vous permettre\
-            de trouver une carte-mère",
+            description="Chercher dans les champs pourrait vous permettre"
+                       " de trouver une carte-mère",
             objectives=["Obtenir la clé-à-molette", "Aller dans les champs",
             "Utiliser la clé-à-molette"],
             character = None,
