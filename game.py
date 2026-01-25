@@ -58,7 +58,7 @@ class Game:
 
 
         # Setup rooms
-        forest = Room("forest", " un sentier sombre, une cabane abandonnée et "
+        forest = Room("forest", " un sentier sombre, au loin il y a une cabane abandonnée et "
         "le bruit assourdissant d'une cascade.")
         self.rooms.append(forest)
 
@@ -68,23 +68,26 @@ class Game:
         self.rooms.append(Maison_rez_de_chaussée)
 
         Maison_étage = Room("étage", " une odeur de pourriture et de moisissure,"
-        "un fin rayon de lumière révèle les lieux autrement noyé par le noir. "
+        "un fin rayon de lumière révèle les lieux, autrement noyés par le noir. "
         "Les murs semblent écouter, vous retenez votre souffle.")
         self.rooms.append(Maison_étage)
 
         Champs = Room("champs", " un champs de maïs peu entrenu, "
         "un petit sentier de sable sillone les brins séchés. "
-        "Au loin vous apercevez un silo abandonné, abimé par le passage du temps.")
+        "Devant vous apercevez un silo abandonné, abimé par le passage du temps."
+        "Vous y voyez une plaque métalique qui semble bouger au vent.")
         self.rooms.append(Champs)
 
         Magasin = Room("magasin", " une ruelle au bitume éclatée, "
         "la devanture cassée révèle une superette aux rayons renversés.")
         self.rooms.append(Magasin)
 
-        pont = Room("pont", " un grand pont un peu fissuré.")
+        pont = Room("pont", " un grand pont un peu fissuré, plongé dans le silence."
+        "Menaçant de s'effondrer à chaque pas.")
         self.rooms.append(pont)
 
-        Voiture = Room("voiture", " une vielle cadillac bleu aux phares jaunies et à la carosserie.")
+        Voiture = Room("voiture", " une vielle cadillac bleu aux phares jaunies"
+        "et à la carosserie cabossée. Sous le tableau de bord, des fils électriques pendent.")
         self.rooms.append(Voiture)
 
         Sous_sol = Room("sous-sol", " une pièce humide, plongée dans le noir, "
@@ -158,12 +161,12 @@ class Game:
         # Setup Characters
         Beau_Abbot = Character("Beau Abbot", "Le cadet de la famille Abbot, agé d'a peine 4 ans. Il vous regarde de ses petits yeux innocents.", 
         Maison_rez_de_chaussée,
-        ["Bonjour", "Je m'appelle Beau"],can_move=True)
+        ["Bonjour...", "J'ai vu un monstre dehors... mais il dormait.'"],can_move=True)
         self.character.append(Beau_Abbot)
         Maison_rez_de_chaussée.characters[Beau_Abbot.name] = Beau_Abbot
 
         Marcus_Abbot = Character("Marcus Abbot", "Le deuxième fils de la famille Abbot, agé de 12 ans. Il fuit votre regard, apeuré.", Maison_étage, 
-        ["Bonjour", "Je m'appelle Marcus"], can_move=True)
+        ["...Moins de bruit.", "Ils entendent tout. Même nos pas."], can_move=True)
         self.character.append(Marcus_Abbot)
         Maison_étage.characters[Marcus_Abbot.name] = Marcus_Abbot
 
@@ -178,12 +181,13 @@ class Game:
         }
 
         Regan_Abbot = Character("Regan Abbot", "la fille aînée de la famille Abbot, agée de 16 ans. Elle vous observe avec méfiance.", Maison_rez_de_chaussée, 
-        ["Bonjour", "Je m'appelle Regan"], can_move=True)
+        ["Ne le pers pas... c'est rare.", "Fais attention à toi."], can_move=True)
         self.character.append(Regan_Abbot)
         Maison_rez_de_chaussée.characters[Regan_Abbot.name] = Regan_Abbot
 
-        Evelyn_Abbot = Character("Evelyn Abbot", "la mère de la famille. Enceinte et très protectrice de ses enfants", Maison_étage, 
-        ["Bonjour", "Je m'appelle Evelyn"], can_move=True)
+        Evelyn_Abbot = Character("Evelyn Abbot", "la mère de la famille. Enceinte et très protectrice de ses enfants", Magasin, 
+        ["Chut... fais attention où tu mets les pieds.", 
+        "Je fouille depuis des heures... il reste presque plus rien."], can_move=True)
         self.character.append(Evelyn_Abbot)
         Magasin.characters[Evelyn_Abbot.name] = Evelyn_Abbot
 
