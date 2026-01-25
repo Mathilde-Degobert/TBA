@@ -92,12 +92,12 @@ class Game:
         self.rooms.append(Sous_sol)
 
         # Create exits for rooms
-        forest.exits = {"N" : None, "E" : None, "S" : pont, "O" : None, "U": None, "D": None}
-        pont.exits = {"N" : forest, "E" : None, "S" : Magasin, "O" : None, "U": None, "D": None}
-        Magasin.exits = {"N" : pont, "E" : Champs, "S" : None, "O" : None, "U": None, "D": None }
-        Champs.exits = {"N" : None, "E" : None, "S" : Maison_rez_de_chaussée, "O" : Magasin, 
+        forest.exits = {"N" : None, "E" : None, "S" : Maison_rez_de_chaussée, "O" : None, "U": None, "D": None}
+        pont.exits = {"N" : None, "E" : Maison_rez_de_chaussée, "S" : None, "O" : Magasin, "U": None, "D": None}
+        Magasin.exits = {"N" : None, "E" : pont, "S" : None, "O" : None, "U": None, "D": None }
+        Champs.exits = {"N" : None, "E" : None, "S" : None, "O" : Maison_rez_de_chaussée, 
         "U": None, "D": None}
-        Maison_rez_de_chaussée.exits = {"N" : Champs, "E" : None, "S" : Voiture, "O" : None, 
+        Maison_rez_de_chaussée.exits = {"N" : forest, "E" : None, "S" : Voiture, "O" : None, 
         "U": Maison_étage, "D": Sous_sol}
         Maison_étage.exits = {"N" : None, "E" : None, "S" : None, "O" : None, "U": None, 
         "D": Maison_rez_de_chaussée}
