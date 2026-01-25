@@ -1,4 +1,5 @@
 # Define the Player class.
+""" Module for player representation in the game. """
 from quest import QuestManager
 
 class Player():
@@ -22,9 +23,9 @@ class Player():
         self.move_count = 0
         self.quest_manager = QuestManager(self)
 
-            
     # Define the move method.
     def move(self, direction):
+        """ Move the player to another room."""
         # Get the next room from the exits dictionary of the current room.
         next_room = self.current_room.exits[direction]
 
@@ -32,23 +33,23 @@ class Player():
         if next_room is None:
             print("\nAucune porte dans cette direction !\n")
             return False
-        
+
         # Vérifier si la pièce est verrouillée
         if next_room.locked:
             print(f"\n{next_room.locked_message}\n")
             return False
-        
+
         # Set the current room to the next room.
         self.history.append(self.current_room)
         self.current_room = next_room
         print(self.current_room.get_long_description())
-        
+
         # Check room visit objectives
         self.quest_manager.check_room_objectives(self.current_room.name)
 
         # Increment move counter
         self.move_count += 1
-        
+
         return True
 
 
@@ -68,22 +69,25 @@ class Player():
                 self.quest_manager.check_item_objectives(reward.name)
                 # Si c'est le dispositif d'ultrasons, retire les matériaux utilisés
                 if reward.name == "dispositif à ultrasons":
-                    materiaux_requis = ["modulateur", "batterie", "piles", "câbles", "microphone", "appareil-auditif", "carte-mère"]
+                    materiaux_requis = ["modulateur", "batterie", "piles",
+                    "câbles", "microphone", "appareil-auditif", "carte-mère"]
                     for mat in materiaux_requis:
                         if mat in self.inventory:
                             del self.inventory[mat]
                 return True
             else:
                 current_room.items[reward.name] = reward
-                print(f"\nVotre inventaire est trop plein pour {reward.name}. L'objet a été déposé dans la pièce.\n")
+                print(f"\nVotre inventaire est trop plein pour {reward.name}.\
+                L'objet a été déposé dans la pièce.\n")
                 return False
 
     # Define the history method.
     def get_history(self):
+        """Display the player's visited rooms history."""
         if self.history == []:
             print("\nVous n'avez pas encore visité de pièces.\n")
             return False
-        
+
         else :
             print("\nVous avez déjà visité les lieux suivants :")
             for room in self.history:
@@ -94,7 +98,7 @@ class Player():
         if not self.inventory :
             print("\nVotre inventaire est vide.\n")
             return False
-        
+
         else :
             print("\nVotre inventaire contient :")
             for item_name, item in self.inventory.items():

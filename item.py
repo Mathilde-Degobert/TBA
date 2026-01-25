@@ -1,3 +1,4 @@
+""" This module contains the Item class which represents an item in the game. """
 
 class Item:
     """
@@ -12,12 +13,12 @@ class Item:
         __init__(self, name, description, weight): The constructor.
         __str__(self): Return a textual representation of the item.
     """
-    
+
     def __init__(self, name, description, weight):
         self.name = name
         self.description = description
         self.weight = weight
-    
+
     def __str__(self):
         """ Returns a textual representation of the item."""
         return f"{self.name} : {self.description} ({self.weight} g)"
