@@ -22,3 +22,15 @@ class Item:
     def __str__(self):
         """ Returns a textual representation of the item."""
         return f"{self.name} : {self.description} ({self.weight} g)"
+
+    def is_heavy(self, threshold=10.0):
+        """
+        Check if the item is heavy based on a weight threshold.
+        
+        Args:
+            threshold (float): The weight threshold in kg (default: 10.0).
+            
+        Returns:
+            bool: True if the item's weight exceeds the threshold, False otherwise.
+        """
+        return self.weight > threshold

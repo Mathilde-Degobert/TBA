@@ -184,7 +184,7 @@ class Actions:
         # Show characters (PNJ) present in the same room
         if player.current_room.characters:
             print("\nPersonnes présentes :")
-            for character_name, character in player.current_room.characters.items():
+            for character in player.current_room.characters.values():
                 print(f"- {character.name} : {character.description}")
         return True
 
@@ -318,14 +318,14 @@ class Actions:
         return True
 
     @staticmethod
-    def move_pnj(game, list_of_words, number_of_parameters):
+    def move_pnj(game, _list_of_words, _number_of_parameters):
         """
         Move all non-player characters in the game.
 
         Args:
             game (Game): The game object.
-            list_of_words (list): The list of words in the command (unused).
-            number_of_parameters (int): The number of parameters (unused).
+            _list_of_words (list): The list of words in the command (unused).
+            _number_of_parameters (int): The number of parameters (unused).
 
         Returns:
             bool: True if the command was executed successfully.
@@ -433,7 +433,8 @@ class Actions:
         return True
 
     @staticmethod
-    def check_condition_outils(game, outil: str, localisation: str, objets_piece: list, inventaire: list):
+    def check_condition_outils(game, outil: str, localisation: str,
+                               objets_piece: list, inventaire: list):
         """
         Vérifie si toutes les conditions d'utilisation de l'outil sont remplies.
         Affiche des messages d'erreur précis si une condition n'est pas satisfaite.
@@ -710,7 +711,7 @@ class Actions:
                 print(f"Vous avez reçu {current_step.reward_item.name} comme récompense.")
             if quest.is_complete() and not getattr(quest, 'title', None) == "La quête principale":
                 print(f"Félicitations, vous avez complété la quête: {quest.title}")
-            return
+            return True
 
         # Sinon, afficher le dialogue et gérer les choix, puis continuer
         Actions.handle_dialogue(current_step)

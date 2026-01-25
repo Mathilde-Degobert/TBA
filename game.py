@@ -29,15 +29,15 @@ class Game:
         """Setup the game rooms, items, characters, and player."""
 
         # Setup commands
-        help = Command("help", " : afficher cette aide", Actions.help, 0)
-        self.commands["help"] = help
-        quit = Command("quit", " : quitter le jeu", Actions.quit, 0)
-        self.commands["quit"] = quit
+        cmd_help = Command("help", " : afficher cette aide", Actions.help, 0)
+        self.commands["help"] = cmd_help
+        cmd_quit = Command("quit", " : quitter le jeu", Actions.quit, 0)
+        self.commands["quit"] = cmd_quit
         go = Command("go", " <direction> : se déplacer dans une direction cardinale"
-                            " (N, E, S, O, U, D)", Actions.go, 1)
+                    " (N, E, S, O, U, D)", Actions.go, 1)
         self.commands["go"] = go
         history = Command("history", " : afficher l'historique des pièces visitées",
-                         Actions.history, 0)
+                 Actions.history, 0)
         self.commands["history"] = history
         back = Command("back", " : revenir au lieu précédent", Actions.go_back, 0)
         self.commands["back"] = back
@@ -46,7 +46,7 @@ class Game:
         take = Command("take", " <item> : prendre un objet", Actions.take, 1)
         self.commands["take"] = take
         drop = Command("drop", " <item> : déposer un objet de l'inventaire"
-                              " dans la pièce", Actions.drop, 1)
+                      " dans la pièce", Actions.drop, 1)
         self.commands["drop"] = drop
         check = Command("check", " : afficher le contenu de l'inventaire", Actions.check, 0)
         self.commands["check"] = check
@@ -57,8 +57,9 @@ class Game:
         quests = Command("quests", " : afficher la liste de toutes les quêtes", Actions.quests, 0)
         self.commands["quests"] = quests
         quest = Command("quest", " <nom> : afficher l'avancement d'une quête"
-                               " spécifique", Actions.quest, 1)
+                       " spécifique", Actions.quest, 1)
         self.commands["quest"] = quest
+
 
 
         # Setup rooms
@@ -66,163 +67,170 @@ class Game:
         "le bruit assourdissant d'une cascade.")
         self.rooms.append(forest)
 
-        Maison_rez_de_chaussée = Room("rez de chaussée", " une grande pièce abandonée, "
+        maison_rez_de_chaussee = Room("rez de chaussée", " une grande pièce abandonée, "
         "un silence lugubre règne. La seule trace de vie : "
         "des traces de passage dans la poussière du parquet qui menace de craquer à chaque pas.")
-        self.rooms.append(Maison_rez_de_chaussée)
+        self.rooms.append(maison_rez_de_chaussee)
 
-        Maison_étage = Room("étage", " une odeur de pourriture et de moisissure,"
+        maison_etage = Room("étage", " une odeur de pourriture et de moisissure, "
         "un fin rayon de lumière révèle les lieux, autrement noyés par le noir. "
         "Les murs semblent écouter, vous retenez votre souffle.")
-        self.rooms.append(Maison_étage)
+        self.rooms.append(maison_etage)
 
-        Champs = Room("champs", " un champs de maïs peu entrenu, "
+        champs = Room("champs", " un champs de maïs peu entrenu, "
         "un petit sentier de sable sillone les brins séchés. "
         "Devant vous apercevez un silo abandonné, abimé par le passage du temps."
         "Vous y voyez une plaque métalique qui semble bouger au vent.")
-        self.rooms.append(Champs)
+        self.rooms.append(champs)
 
-        Magasin = Room("magasin", " une ruelle au bitume éclatée, "
+        magasin = Room("magasin", " une ruelle au bitume éclatée, "
         "la devanture cassée révèle une superette aux rayons renversés.")
-        self.rooms.append(Magasin)
+        self.rooms.append(magasin)
 
-        pont = Room("pont", " un grand pont un peu fissuré, plongé dans le silence."
+        pont = Room("pont", " un grand pont un peu fissuré, plongé dans le silence. "
         "Menaçant de s'effondrer à chaque pas.")
         self.rooms.append(pont)
 
-        Voiture = Room("voiture", " une vielle cadillac bleu aux phares jaunies"
+        voiture = Room("voiture", " une vielle cadillac bleu aux phares jaunies "
         "et à la carosserie cabossée. Sous le tableau de bord, des fils électriques pendent.")
-        self.rooms.append(Voiture)
+        self.rooms.append(voiture)
 
-        Sous_sol = Room("sous-sol", " une pièce humide, plongée dans le noir, "
+        sous_sol = Room("sous-sol", " une pièce humide, plongée dans le noir, "
         "jonchée d'objets en tout genre.")
-        self.rooms.append(Sous_sol)
+        self.rooms.append(sous_sol)
 
         # Create exits for rooms
-        forest.exits = {"N" : None, "E" : None, "S" : Maison_rez_de_chaussée,
+        forest.exits = {"N" : None, "E" : None, "S" : maison_rez_de_chaussee,
         "O" : None, "U": None, "D": None}
-        pont.exits = {"N" : None, "E" : Maison_rez_de_chaussée, "S" : None,
-        "O" : Magasin, "U": None, "D": None}
-        Magasin.exits = {"N" : None, "E" : pont, "S" : None, "O" : None, "U": None, "D": None }
-        Champs.exits = {"N" : None, "E" : None, "S" : None, "O" : Maison_rez_de_chaussée,
+        pont.exits = {"N" : None, "E" : maison_rez_de_chaussee, "S" : None,
+        "O" : magasin, "U": None, "D": None}
+        magasin.exits = {"N" : None, "E" : pont, "S" : None, "O" : None, "U": None, "D": None }
+        champs.exits = {"N" : None, "E" : None, "S" : None, "O" : maison_rez_de_chaussee,
         "U": None, "D": None}
-        Maison_rez_de_chaussée.exits = {"N" : forest, "E" : None, "S" : Voiture, "O" : Champs,
-        "U": Maison_étage, "D": Sous_sol}
-        Maison_étage.exits = {"N" : None, "E" : None, "S" : None, "O" : None, "U": None,
-        "D": Maison_rez_de_chaussée}
-        Voiture.exits = {"N" : Maison_rez_de_chaussée , "E" : None, "S" : None, "O" : None,
+        maison_rez_de_chaussee.exits = {"N" : forest, "E" : champs, "S" : voiture, "O" : pont,
+        "U": maison_etage, "D": sous_sol}
+        maison_etage.exits = {"N" : None, "E" : None, "S" : None, "O" : None, "U": None,
+        "D": maison_rez_de_chaussee}
+        voiture.exits = {"N" : maison_rez_de_chaussee , "E" : None, "S" : None, "O" : None,
         "U": None, "D": None}
-        Sous_sol.exits = {"N" : None , "E" : None, "S" : None, "O" : None,
-        "U": Maison_rez_de_chaussée, "D": None}
+        sous_sol.exits = {"N" : None , "E" : None, "S" : None, "O" : None,
+        "U": maison_rez_de_chaussee, "D": None}
 
         # Verrouiller l'étage et le sous-sol
-        Maison_étage.locked = True
-        Maison_étage.locked_message = ("La porte de l'étage est fermée à clé."
+        maison_etage.locked = True
+        maison_etage.locked_message = ("La porte de l'étage est fermée à clé."
                                        " Vous avez besoin de la clé-étage pour l'ouvrir.")
-        Sous_sol.locked = True
-        Sous_sol.locked_message = ("L'escalier du sous-sol est bloqué"
+        sous_sol.locked = True
+        sous_sol.locked_message = ("L'escalier du sous-sol est bloqué"
                                    " par une grille rouillée. Vous avez"
                                    " besoin des clés pour y accéder.")
 
         # Setup items
         # Items trouvables sur la map
-            # MATERIAUX
-        Modulateur = Item("modulateur", "Module d'amplification (matériau)", 12)
-        forest.items[Modulateur.name] = Modulateur
-        Batterie = Item("batterie", "Vieille batterie (matériau)", 60)
-        pont.items[Batterie.name] = Batterie
-        Piles = Item("piles", "Boîte de 4 piles (matériau)", 10)
-        Magasin.items[Piles.name] = Piles
-        Table_bricolage = Item("table", "une table de bricolage avec"
+        # MATERIAUX
+        modulateur = Item("modulateur", "Module d'amplification (matériau)", 12)
+        forest.items[modulateur.name] = modulateur
+        batterie = Item("batterie", "Vieille batterie (matériau)", 60)
+        pont.items[batterie.name] = batterie
+        piles = Item("piles", "Boîte de 4 piles (matériau)", 10)
+        magasin.items[piles.name] = piles
+        table_bricolage = Item("table", "une table de bricolage avec"
                                         " tous les outils nécessaires", 50000)
-        Sous_sol.items[Table_bricolage.name] = Table_bricolage
-            # OUTILS
-        Clés_sous_sol = Item("clés", "les clés menant au sous-sol", 1)
-        Voiture.items[Clés_sous_sol.name] = Clés_sous_sol
+        sous_sol.items[table_bricolage.name] = table_bricolage
+        # OUTILS
+        cles_sous_sol = Item("clés", "les clés menant au sous-sol", 1)
+        voiture.items[cles_sous_sol.name] = cles_sous_sol
         pied_de_biche = Item("pied-de-biche", "Un pied-de-biche solide (outil)",
         4.0)
         pont.items[pied_de_biche.name] = pied_de_biche
-        Sac_de_sable = Item("sac-de-sable", "Un sac de sable lourd --> peut"
+        sac_de_sable = Item("sac-de-sable", "Un sac de sable lourd --> peut"
                                            " amortir le son de vos pas (outil)", 20.0)
-        Sous_sol.items[Sac_de_sable.name] = Sac_de_sable
+        sous_sol.items[sac_de_sable.name] = sac_de_sable
 
         # Récompenses de quêtes :
-            # MATERIAUX
-        CarteMere = Item("carte-mère", "Carte mère d'ordinateur (matériau)", 25)
-        Microphone = Item("microphone", "Microphone de babyphone (matériau)", 15)
-        Appareil_Auditif = Item("appareil-auditif", "Appareil auditif (matériau)", 8)
-        Câbles = Item("câbles", "Des câbles électriques (matériau)", 5)
-            # OUTILS
-        Marteau = Item("marteau", "Un marteau robuste (outil)", 2.5)
-        Tournevis = Item("tournevis", "Un tournevis multifonction (outil)", 1.5)
-        Cle_a_molette = Item("clé-à-molette", "Une clé-à-molette (outil)", 3.0)
-        Clé_Etage = Item("clé-étage", "la clé menant à l'étage (outil)", 1)
-        Dispositif_ultrasons = Item("dispositif à ultrasons",
+        # MATERIAUX
+        carte_mere = Item("carte-mère", "Carte mère d'ordinateur (matériau)", 25)
+        microphone = Item("microphone", "Microphone de babyphone (matériau)", 15)
+        appareil_auditif = Item("appareil-auditif", "Appareil auditif (matériau)", 8)
+        cables = Item("câbles", "Des câbles électriques (matériau)", 5)
+        # OUTILS
+        marteau = Item("marteau", "Un marteau robuste (outil)", 2.5)
+        tournevis = Item("tournevis", "Un tournevis multifonction (outil)", 1.5)
+        cle_a_molette = Item("clé-à-molette", "Une clé-à-molette (outil)", 3.0)
+        cle_etage = Item("clé-étage", "la clé menant à l'étage (outil)", 1)
+        dispositif_ultrasons = Item("dispositif à ultrasons",
         "un dispositif à ultrasons (créé)", 8.0)
 
         # Rendre accessibles ces outils/récompenses dans setup_quests
-        self.Marteau = Marteau
-        self.Tournevis = Tournevis
-        self.Cle_a_molette = Cle_a_molette
-        self.Cle_Etage = Clé_Etage
-        self.Câbles = Câbles
-        self.Microphone = Microphone
-        self.Appareil_Auditif = Appareil_Auditif
-        self.CarteMere = CarteMere
-        self.Dispositif_ultrasons = Dispositif_ultrasons
+        self.marteau = marteau
+        self.tournevis = tournevis
+        self.cle_a_molette = cle_a_molette
+        self.cle_etage = cle_etage
+        self.cables = cables
+        self.microphone = microphone
+        self.appareil_auditif = appareil_auditif
+        self.carte_mere = carte_mere
+        self.dispositif_ultrasons = dispositif_ultrasons
 
         # Setup Characters
-        Beau_Abbot = Character("Beau Abbot", "Le cadet de la famille Abbot,"
-                                             " agé d'a peine 4 ans. Il vous regarde"
-                                             " de ses petits yeux innocents.",
-        Maison_rez_de_chaussée,
-        ["Bonjour...", "J'ai vu un monstre dehors... mais il dormait.'"],can_move=True)
-        self.character.append(Beau_Abbot)
-        Maison_rez_de_chaussée.characters[Beau_Abbot.name] = Beau_Abbot
+        beau_abbot = Character("Beau Abbot", "Le cadet de la famille Abbot,"
+                       " agé d'a peine 4 ans. Il vous regarde"
+                       " de ses petits yeux innocents.",
+                       maison_rez_de_chaussee,
+                       ["Bonjour...", "J'ai vu un monstre dehors... mais il dormait.'"],
+                       can_move=True)
+        self.character.append(beau_abbot)
+        maison_rez_de_chaussee.characters[beau_abbot.name] = beau_abbot
 
-        Marcus_Abbot = Character("Marcus Abbot", "Le deuxième fils de la famille Abbot,"
-                                                 " agé de 12 ans. Il fuit votre regard, apeuré.",
-                                                  Maison_étage,
-        ["...Moins de bruit.", "Ils entendent tout. Même nos pas."], can_move=True)
-        self.character.append(Marcus_Abbot)
-        Maison_étage.characters[Marcus_Abbot.name] = Marcus_Abbot
+        marcus_abbot = Character("Marcus Abbot", "Le deuxième fils de la famille Abbot,"
+                     " agé de 12 ans. Il fuit votre regard, apeuré.",
+                     maison_etage,
+                     ["...Moins de bruit.", "Ils entendent tout. Même nos pas."],
+                     can_move=True)
+        self.character.append(marcus_abbot)
+        maison_etage.characters[marcus_abbot.name] = marcus_abbot
 
-        Lee_Abbot = Character("Lee Abbot", "Le père de famille, un homme d'une quarantaine"
-                                          " d'années. Il semble tendu.", Sous_sol,
-        ["Rebonjour ! Encore Merci pour votre aide. Je peux vous prêter un outil"
-         " si vous avez besoin. \nLequel de ces outils veux-tu ?"], can_move=True)
-        self.character.append(Lee_Abbot)
-        Sous_sol.characters[Lee_Abbot.name] = Lee_Abbot
-        Lee_Abbot.tool_choices = {
-            "Marteau": Marteau,
-            "Tournevis": Tournevis,
-            "Clé-à-molette": Cle_a_molette
+        lee_abbot = Character("Lee Abbot", "Le père de famille, un homme d'une quarantaine"
+                         " d'années. Il semble tendu.", sous_sol,
+                     ["Rebonjour ! Encore Merci pour votre aide. Je peux vous prêter un outil"
+                      " si vous avez besoin. \nLequel de ces outils veux-tu ?"],
+                     can_move=True)
+        self.character.append(lee_abbot)
+        sous_sol.characters[lee_abbot.name] = lee_abbot
+        lee_abbot.tool_choices = {
+            "Marteau": marteau,
+            "Tournevis": tournevis,
+            "Clé-à-molette": cle_a_molette
         }
 
-        Regan_Abbot = Character("Regan Abbot", "la fille aînée de la famille Abbot,"
-                                              " agée de 16 ans. Elle vous observe avec méfiance.",
-                                                Maison_rez_de_chaussée,
-        ["Ne le pers pas... c'est rare.", "Fais attention à toi."], can_move=True)
-        self.character.append(Regan_Abbot)
-        Maison_rez_de_chaussée.characters[Regan_Abbot.name] = Regan_Abbot
+        regan_abbot = Character("Regan Abbot", "la fille aînée de la famille Abbot,"
+                     " agée de 16 ans. Elle vous observe avec méfiance.",
+                     maison_rez_de_chaussee,
+                     ["Ne le pers pas... c'est rare.", "Fais attention à toi."],
+                     can_move=True)
+        self.character.append(regan_abbot)
+        maison_rez_de_chaussee.characters[regan_abbot.name] = regan_abbot
 
-        Evelyn_Abbot = Character("Evelyn Abbot", "la mère de la famille."
-                                                " Enceinte et très protectrice de ses enfants",
-                                                 Magasin,
-        ["Chut... fais attention où tu mets les pieds.",
-        "Je fouille depuis des heures... il reste presque plus rien."], can_move=True)
-        self.character.append(Evelyn_Abbot)
-        Magasin.characters[Evelyn_Abbot.name] = Evelyn_Abbot
+        evelyn_abbot = Character("Evelyn Abbot", "la mère de la famille."
+                     " Enceinte et très protectrice de ses enfants",
+                     magasin,
+                     ["Chut... fais attention où tu mets les pieds.",
+                      "Je fouille depuis des heures... il reste presque plus rien."],
+                     can_move=True)
+        self.character.append(evelyn_abbot)
+        magasin.characters[evelyn_abbot.name] = evelyn_abbot
 
-        Femme_dans_la_foret = Character("La femme dans la forêt",
-        "une vieille dame perdue rendue folle par le deuil", forest,
-        ["Bonjour", "Je m'appelle... je ne me souviens plus"], can_move=True)
-        self.character.append(Femme_dans_la_foret)
-        forest.characters[Femme_dans_la_foret.name] = Femme_dans_la_foret
+        femme_dans_la_foret = Character("La femme dans la forêt",
+                        "une vieille dame perdue rendue folle par le deuil",
+                        forest,
+                        ["Bonjour", "Je m'appelle... je ne me souviens plus"],
+                        can_move=True)
+        self.character.append(femme_dans_la_foret)
+        forest.characters[femme_dans_la_foret.name] = femme_dans_la_foret
 
         # Setup player and starting room
         self.player = Player(input("\nEntrez votre nom: "))
-        self.player.current_room = pont
+        self.player.current_room = maison_rez_de_chaussee
 
         # Setup quests
         self.setup_quests()
@@ -252,7 +260,7 @@ class Game:
             choices =  [["Puis-je vous aider ?", "Que faites-vous ici ?",
             "Je n'ai besoin de rien." ], [], []],
             correct_choices = [["Puis-je vous aider ?"], [], []],
-            reward = self.Cle_Etage
+            reward = self.cle_etage
 
         )
 
@@ -265,7 +273,7 @@ class Game:
             dialogue = [],
             choices =  [],
             correct_choices = [],
-            reward= self.Câbles
+            reward= self.cables
         )
 
         microphone_quest = Quest(
@@ -276,7 +284,7 @@ class Game:
             dialogue = [],
             choices =  [],
             correct_choices = [],
-            reward= self.Microphone
+            reward= self.microphone
         )
 
 
@@ -320,7 +328,7 @@ class Game:
             choices =  [["Puis-je vous aider ?", "Que faites-vous ici ?",
             "Je n'ai besoin de rien." ], []],
             correct_choices = [["Puis-je vous aider ?"], []],
-            reward= self.Appareil_Auditif
+            reward= self.appareil_auditif
         )
 
         carte_mere_quest = Quest(
@@ -333,7 +341,7 @@ class Game:
             dialogue = [],
             choices =  [],
             correct_choices = [],
-            reward= self.CarteMere
+            reward= self.carte_mere
         )
 
         modulateur_quest = Quest(
@@ -364,7 +372,7 @@ class Game:
             dialogue = [],
             choices =  [],
             correct_choices = [],
-            reward= self.Dispositif_ultrasons
+            reward= self.dispositif_ultrasons
         )
 
         # Add quests to player's quest manager
@@ -386,7 +394,6 @@ class Game:
         while not self.finished:
             # Get the command from the player
             self.process_command(input("> "))
-        return None
 
     def process_command(self, command_string) -> None:
         """Process the command entered by the player.

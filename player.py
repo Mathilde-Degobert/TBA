@@ -61,24 +61,25 @@ class Player():
         Args:
             reward (str): The reward to add.
         """
-        if reward:
-            if self.check_inventory_space(reward.weight):
-                self.inventory[reward.name] = reward
-                print(f"Vous avez obtenu : {reward.name}\n")
-                # Vérifier si l'obtention de l'objet valide un objectif de quête
-                self.quest_manager.check_item_objectives(reward.name)
-                # Si c'est le dispositif d'ultrasons, retire les matériaux utilisés
-                if reward.name == "dispositif à ultrasons":
-                    materiaux_requis = ["modulateur", "batterie", "piles",
-                    "câbles", "microphone", "appareil-auditif", "carte-mère"]
-                    for mat in materiaux_requis:
-                        if mat in self.inventory:
-                            del self.inventory[mat]
-                return True
-            print(f"\nVotre inventaire est trop plein pour {reward.name}.")
-            print("L'objet a été déposé dans la pièce.\n")
-            self.current_room.items[reward.name] = reward
+        if not reward:
             return False
+        if self.check_inventory_space(reward.weight):
+            self.inventory[reward.name] = reward
+            print(f"Vous avez obtenu : {reward.name}\n")
+            # Vérifier si l'obtention de l'objet valide un objectif de quête
+            self.quest_manager.check_item_objectives(reward.name)
+            # Si c'est le dispositif d'ultrasons, retire les matériaux utilisés
+            if reward.name == "dispositif à ultrasons":
+                materiaux_requis = ["modulateur", "batterie", "piles",
+                "câbles", "microphone", "appareil-auditif", "carte-mère"]
+                for mat in materiaux_requis:
+                    if mat in self.inventory:
+                        del self.inventory[mat]
+            return True
+        print(f"\nVotre inventaire est trop plein pour {reward.name}.")
+        print("L'objet a été déposé dans la pièce.\n")
+        self.current_room.items[reward.name] = reward
+        return False
 
     # Define the history method.
     def get_history(self):

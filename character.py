@@ -15,7 +15,7 @@ class Character():
     """
 
     # Constructor
-    def __init__(self, name: str, description: str, current_room, msgs, can_move=True):
+    def __init__(self, name: str, description: str, current_room, msgs, *, can_move=True):
         """
         Initialize a character.
 
@@ -38,13 +38,6 @@ class Character():
     def __str__(self):
         return f"{self.name} : {self.description}"
 
-    def move_aleatoire(self):
-        """ Move randomly the character to an adjacent room.
-        Returns:
-            bool: True if the character can move, False otherwise.
-        """
-        return random.choice([True, False])
-#####
     def move(self):
         """ Move the character to a random adjacent room."""
         if not self.can_move:

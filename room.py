@@ -19,8 +19,6 @@ class Room:
         self.characters = {}
         self.locked = False
         self.locked_message = "La porte est fermée à clé."
-        self.entry_condition = None  # Fonction de vérification pour entrer
-        self.entry_denied_message = "Vous ne pouvez pas entrer ici."
 
     # Define the get_exit method.
     def get_exit(self, direction):
@@ -30,7 +28,7 @@ class Room:
         Returns:
             Room: The room in the given direction."""
         # Return the room in the given direction if it exists.
-        if direction in self.exits.keys():
+        if direction in self.exits:
             return self.exits[direction]
         return None
 

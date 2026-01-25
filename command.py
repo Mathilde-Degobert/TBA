@@ -43,3 +43,16 @@ class Command:
         """ Returns a string representation of the command. """
         return  self.command_word \
                 + self.help_string
+
+    def execute(self, game, list_of_words):
+        """
+        Execute the command's action with the given game and arguments.
+        
+        Args:
+            game: The game object.
+            list_of_words (list): The command arguments.
+            
+        Returns:
+            The result of the action execution.
+        """
+        return self.action(game, list_of_words, self.number_of_parameters)

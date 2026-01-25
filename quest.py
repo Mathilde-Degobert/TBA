@@ -6,7 +6,7 @@ class Quest:
     description, objectives, completion status, and optional rewards.
     """
 
-    def __init__(self, title, description, objectives=None, character=None,
+    def __init__(self, title, description, *, objectives=None, character=None,
                  dialogue=None, choices=None, correct_choices=None, reward=None):
         """Initialize a new quest."""
         self.title = title
@@ -375,7 +375,7 @@ class QuestManager:
 class DialogueStep:
     """This class represents a step in a dialogue."""
 
-    def __init__(self, description, dialogue=None, choices=None,
+    def __init__(self, description, *, dialogue=None, choices=None,
                  correct_choices=None, item=None, reward_item=None):
         """Initialize a dialogue step."""
         self.description = description
@@ -420,7 +420,6 @@ class DialogueStep:
                     return text
                 # Condition non remplie, sauter cette étape
                 return None
-                return dialogue_item
         return None
 
     def get_current_choices(self):
